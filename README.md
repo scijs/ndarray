@@ -35,8 +35,13 @@ This is **not** a linear algebra library, and does not implement things like com
 
 ## How does it work?
 
-The central concept in ndarray is the idea of a `view`.  A view is basically an [ArrayBufferView](https://developer.mozilla.org/en-US/docs/JavaScript/Typed_arrays/ArrayBufferView) together with a shape and a stride.  The `shape` of an ndarray is basically its dimensions
+The central concept in ndarray is the idea of a `view`.  A view is basically an [ArrayBufferView](https://developer.mozilla.org/en-US/docs/JavaScript/Typed_arrays/ArrayBufferView) together with a shape and a stride.  The `shape` of an ndarray is basically its dimensions, while the `stride` describes how it is arranged in memory.  To compute an index in a view, you would use the following recipe:
 
+    this.data[i0 * this.stride[0] + i1 * this.stride[1] + i2 * this.stide[2] ....]
+
+Where `i0, i1, ...` is the index of the element we are accessing.
+
+**Note**: You should *not* assume that `this.stride[this.stride-length-1]=1`.  In general, a view can be arranged as either a C-like array (or [row major order](http://en.wikipedia.org/wiki/Row-major_order)) or a FORTRAN-like array (aka column major order(http://en.wikipedia.org/wiki/Row-major_order#Column-major_order)) or anything in between.  Also, the contents of a view may not be packed tightly, as it could represent some view of a subarray.
 
 ## Why use this library instead of manual management of flat typed arrays?
 
