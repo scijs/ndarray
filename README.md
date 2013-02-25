@@ -1,7 +1,6 @@
 ndarray
 =======
-Multidimensional arrays for JavaScript.  Based on these [experiments](https://github.com/mikolalysenko/ndarray-experiments).
-
+Multidimensional arrays for JavaScript.
 
 Basic Usage
 ===========
@@ -16,7 +15,7 @@ Then you can use it in your projects as follows:
 
 API
 ===
-* to be written *
+* *to be written*
 
 FAQ
 ===
@@ -45,7 +44,7 @@ Where `i0, i1, ...` is the index of the element we are accessing.
 
 ## Why use this library instead of manual management of flat typed arrays?
 
-While you can recreate the functionality of this library using typed arrays and manual index arithmetic, in practice doing that is very tedious and error prone.  It also means that you need to pass around extra semantic information, like the shape of the multidimensional array and it's striding.  The
+While you can recreate the functionality of this library using typed arrays and manual index arithmetic, in practice doing that is very tedious and error prone.  It also means that you need to pass around extra semantic information, like the shape of the multidimensional array and it's striding.  Using a view, you can get nearly the same performance as a flat typed array, while still maintaining all of the relevant semantic information.
 
 ## Why use this library instead of numeric.js?
 
@@ -55,6 +54,16 @@ Numeric.js is a fantastic library, and has many useful features for numerical co
 * Allocating an array of native-arrays induces an overhead of O(shape.length^2) extra independent JavaScript objects.  Not only does this greatly increase the amount of memory they consume, but it also prevents them from scaling with block size (leading to cache performance problems).
 * Slicing arrays-of-arrays is an O(n) operation, while resizing a view is only O(1) and can be done without allocating any intermediate objects.
 * Arrays-of-arrays can not be directly uploaded to WebGL, and instead require a costly "unboxing" step to convert them into a typed array.
+
+## What optimizations does this library use?
+
+The following optimizations are planned:
+
+* Typed array back storage
+* 0-allocation accessor interface
+* In place slicing (ie `subarray()` like semantics)
+* Optimized classes for low dimensional views (shape.length <= 4)
+* Cache oblivious view assignment and copying
 
 ## What are the downsides?
 
