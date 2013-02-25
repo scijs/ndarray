@@ -58,7 +58,7 @@ Numeric.js is a fantastic library, and has many useful features for numerical co
 
 ## What are the downsides?
 
-The main problem with using views is that they are not a native part of JavaScript.  If you want to use multidimensional views in your code, you need to decide on a set of interfaces and conventions for accessing elements and specifying slices.  This means that if you have two different view libraries, code written for one or the other won't be able to interoperate without performing some type of conversion step.
+The main problem with using views is that they are not a native part of JavaScript.  If you want to use multidimensional views in your code, you need to decide on a set of interfaces and conventions for accessing elements and specifying slices.  This means that if you have two different view libraries, code written for one or the other won't be able to interoperate without performing some type of conversion step.  One of the higher level goals of this library is to move towards a standard way of doing this in the language.
 
 Credits
 =======
