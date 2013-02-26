@@ -133,7 +133,7 @@ this.data[i0 * this.stride[0] + i1 * this.stride[1] + i2 * this.stide[2] ....]
 
 Where `i0, i1, ...` is the index of the element we are accessing.
 
-**Note**: You should *not* assume that `this.stride[this.stride-length-1]=1`.  In general, a view can be arranged as either a C-like array (or [row major order](http://en.wikipedia.org/wiki/Row-major_order)) or a FORTRAN-like array (aka column major order(http://en.wikipedia.org/wiki/Row-major_order#Column-major_order)) or anything in between.  Also, the contents of a view may not be packed tightly, as it could represent some view of a subarray.
+**Note**: You should *not* assume that `this.stride[this.stride-length-1]=1`.  In general, a view can be arranged in either C/[row major order](http://en.wikipedia.org/wiki/Row-major_order)), FORTRAN/[column major](http://en.wikipedia.org/wiki/Row-major_order#Column-major_order)), or anything in between.  Also, the contents of a view may not be packed tightly, as it could represent some view of a subarray.
 
 ## Why use this library instead of manual management of flat typed arrays?
 
@@ -158,9 +158,9 @@ The following optimizations are planned:
 * Optimized classes for low dimensional views (shape.length <= 4)
 * Cache oblivious view assignment and copying
 
-## What are the downsides?
+## Does this library do any error checking?
 
-The main problem with using views is that they are not a native part of JavaScript.  If you want to use multidimensional views in your code, you need to decide on a set of interfaces and conventions for accessing elements and specifying slices.  This means that if you have two different view libraries, code written for one or the other won't be able to interoperate without performing some type of conversion step.  One of the higher level goals of this library is to move towards a standard way of doing this in the language.
+No.  Don't write past the bounds of the array or you will crash/corrupt its contents.
 
 Credits
 =======

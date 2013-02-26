@@ -5,20 +5,6 @@ var View1 = require("./lib/view1.js");
 var View2 = require("./lib/view2.js");
 var ViewN = require("./lib/viewn.js");
 
-var DTYPE = {
-  INT8:             0,
-  INT16:            1,
-  INT32:            2,
-  UINT8:            4,
-  UINT16:           5,
-  UINT32:           6,
-  FLOAT32:          8,
-  FLOAT64:          9,
-  UNSIGNED:         4,
-  FLOATING_POINT:   8,
-  JSARRAY:          16
-};
-
 //Wraps a typed array as an ndarray
 function wrap(tarray, shape, stride) {
   if(!stride) {
@@ -45,31 +31,28 @@ function wrap(tarray, shape, stride) {
 
 function dtype(view) {
   if(view.data instanceof Float64Array) {
-    return DTYPE.FLOAT64;
+    return "float64";
   } else if(view.data instanceof Float32Array) {
-    return DTYPE.FLOAT32;
+    return "float32";
   } else if(view.data instanceof Int32Array) {
-    return DTYPE.INT32;
+    return "int32";
   } else if(view.data instanceof Uint32Array) {
-    return DTYPE.UINT32;
+    return "uint32";
   } else if(view.data instanceof Uint8Array) {
-    return DTYPE.UINT8;
+    return "uint8";
   } else if(view.data instanceof Uint16Array) {
-    return DTYPE.UINT16;
+    return "uint16";
   } else if(view.data instanceof Int16Array) {
-    return DTYPE.INT16;
+    return "int16";
   } else if(view.data instanceof Int8Array) {
-    return DTYPE.INT8;
-  } else if(view.data instanceof Array) {
-    return DTYPE.JSARRAY;
-  } else {
-    return null;
+    return "int8";
   }
+  return "unknown";
 }
 
 function zeros(shape, dtype, order) {
   if(!dtype) {
-    dtype = DTYPE.FLOAT64;
+    dtype = "float64";
   }
   //Default row-major order
   if(!order) {
@@ -86,44 +69,37 @@ function zeros(shape, dtype, order) {
   }
   var buf;
   switch(dtype) {
-    case DTYPE.INT8:
+    case "int8":
       buf = new Int8Array(size);
     break;
-    case DTYPE.INT16:
+    case "int16":
       buf = new Int16Array(size);
     break;
-    case DTYPE.INT32:
+    case "int32":
       buf = new Int32Array(size);
     break;
-    case DTYPE.UINT8:
+    case "uint8":
       buf = new Uint8Array(size);
     break;
-    case DTYPE.UINT16:
+    case "uint16":
       buf = new Uint16Array(size);
     break;
-    case DTYPE.UINT32:
+    case "uint32":
       buf = new Uint32Array(size);
     break;
-    case DTYPE.FLOAT32:
+    case "float32":
       buf = new Float32Array(size);
     break;
-    case DTYPE.FLOAT64:
+    case "float64":
       buf = new Float64Array(size);
     break;
-    case DTYPE.JSARRAY:
+    default:
       buf = new Array(size);
     break;
-    default:
-      buf = null;
   }
   return wrap(buf, shape, stride);
 }
 
-
 module.exports = wrap;
 module.exports.zeros = zeros;
 module.exports.dtype = dtype;
-module.exports.DTYPE = DTYPE;
-Object.keys(DTYPE).forEach(function(k) {
-  module.exports[k] = DTYPE[k];
-});
