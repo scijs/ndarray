@@ -224,10 +224,10 @@ volume.transpose(2, 0, 1)
 ## Bulk Operations
 Finally, array views expose a few bulk memory operations.
 
-### `clone([o0, o1, o2, ... ])`
+### `array.clone([o0, o1, o2, ... ])`
 Makes a copy of the array with an optionally specified ordering
 
-### `assign(other)`
+### `array.assign(other)`
 Copies the contents of `other` into this view.
 
 **TODO:**  Eventually make this support in place moves so you can use it to transpose matrices.  ie:
