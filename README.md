@@ -124,8 +124,8 @@ Returns the data type of the underlying array.  The result is one of the followi
 Creates an array filled with zeros.
 
 * `shape` is the shape of the array to create
-* `dtype` is the datatype of the array to create.  Must be one of the types specified in the above list.
-* `order` is the order of the components of the array.
+* `dtype` is the datatype of the array to create.  Must be one of the types specified in the above list. (Default: `"float64"`)
+* `order` is the order of the components of the array.  (Default: row-major)
 
 Returns a view of a newly allocated array.
 
@@ -143,7 +143,7 @@ The shape of the multidimensional array
 The stride of the typed array
 
 ### `get(i,j,k,...)`
-Retrieves an element from the array
+Retrieves an element from the array.
 
 ### `set(i,j,k,..., v)`
 Sets an element in the array to value `v`
@@ -159,6 +159,11 @@ Returns a new view of a shifted subarray
 
 ### `hi(i,j,k,...)`
 Returns a new view of a truncated subarray
+
+**Note:**  `hi` and `lo` do not commute.   In general:
+
+    a.hi(3,3).lo(3,3)  !=  a.lo(3,3).hi(3,3)
+
 
 FAQ
 ===
