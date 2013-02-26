@@ -121,7 +121,9 @@ This is **not** a linear algebra library, and does not implement things like com
 
 The central concept in ndarray is the idea of a `view`.  A view is basically an [ArrayBufferView](https://developer.mozilla.org/en-US/docs/JavaScript/Typed_arrays/ArrayBufferView) together with a shape and a stride.  The `shape` of an ndarray is basically its dimensions, while the `stride` describes how it is arranged in memory.  To compute an index in a view, you would use the following recipe:
 
-    this.data[i0 * this.stride[0] + i1 * this.stride[1] + i2 * this.stide[2] ....]
+```javascript
+this.data[i0 * this.stride[0] + i1 * this.stride[1] + i2 * this.stide[2] ....]
+```
 
 Where `i0, i1, ...` is the index of the element we are accessing.
 
