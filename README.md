@@ -55,7 +55,7 @@ var y = x.hi(4,4).lo(1,1)
 
 for(var i=0; i<y.shape[0]; ++i) {
   for(var j=0; j<y.shape[1]; ++j) {
-    y.set(i,j) = 1
+    y.set(i,j,1)
   }
 }
 

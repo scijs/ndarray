@@ -67,9 +67,9 @@ function dtype(view) {
   }
 }
 
-function zeros(shape, ndtype, order) {
-  if(!ndtype) {
-    ndtype = DTYPE.FLOAT64;
+function zeros(shape, dtype, order) {
+  if(!dtype) {
+    dtype = DTYPE.FLOAT64;
   }
   //Default row-major order
   if(!order) {
@@ -85,7 +85,7 @@ function zeros(shape, ndtype, order) {
     size *= shape[order[i]];
   }
   var buf;
-  switch(ndtype) {
+  switch(dtype) {
     case DTYPE.INT8:
       buf = new Int8Array(size);
     break;
@@ -116,7 +116,7 @@ function zeros(shape, ndtype, order) {
     default:
       buf = null;
   }
-  return wrap(buf, nshape, stride);
+  return wrap(buf, shape, stride);
 }
 
 
@@ -124,6 +124,6 @@ module.exports = wrap;
 module.exports.zeros = zeros;
 module.exports.dtype = dtype;
 module.exports.DTYPE = DTYPE;
-Object.keys(DTYPE).each(function(k) {
+Object.keys(DTYPE).forEach(function(k) {
   module.exports[k] = DTYPE[k];
 });
