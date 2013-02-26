@@ -51,7 +51,7 @@ You can also pull out views of ndarrays without copying the underlying elements.
 
 ```javascript
 var x = ndarray.zeros([5, 5])
-var y = x.view().hi(4,4).lo(1,1)
+var y = x.hi(4,4).lo(1,1)
 
 for(var i=0; i<y.shape[0]; ++i) {
   for(var j=0; j<y.shape[1]; ++j) {
@@ -79,8 +79,8 @@ for(var i=0; i<y.shape[0]; ++i) {
   }
 }
 
-x.view().hi(3,3).assign(y)
-x.view().lo(2,2).assign(y)
+x.hi(3,3).assign(y)
+x.lo(2,2).assign(y)
 
 //Now:
 //    x = 1 1 1 0 0
@@ -93,9 +93,15 @@ x.view().lo(2,2).assign(y)
 And you can also make copies of arrays:
 
 ```javascript
+var x = ndarray.zeros([1])
 var z = x.clone()
-```
+z.set(0, 1)
 
+//Now:
+//      x = 0
+//
+//      z = 1
+```
 
 API
 ===
