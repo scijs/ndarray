@@ -157,6 +157,8 @@ The central concept in `ndarray` is the idea of a view.  The way these work is v
 * `array.stride` - The layout of the typed array in memory
 * `array.offset` - The starting offset of the array in memory
 
+Keeping a separate stride means that we can use the same data structure to support both [row major and column major storage](http://en.wikipedia.org/wiki/Row-major_order)
+
 
 ## Element Access
 To access elements of the array, you can use the `set/get` methods.  In psuedocode, the way these are implemented is as follows:
@@ -250,18 +252,6 @@ To expose a simple, low level interface for working with contiguous blocks of me
 
 This is **not** a linear algebra library, and does not implement things like component-wise arithmetic or tensor operations.  (Though it should be possible to build such features on top of this library as separate module.)  For now, the best option if you need those features would be to use [numeric.js](http://www.numericjs.com/).
 
-## How does it work?
-
-The central concept in ndarray is the idea of a `view`.  A view is basically an [ArrayBufferView](https://developer.mozilla.org/en-US/docs/JavaScript/Typed_arrays/ArrayBufferView) together with a shape and a stride.  The `shape` of an ndarray is basically its dimensions, while the `stride` describes how it is arranged in memory.  To compute an index in a view, you would use the following recipe:
-
-```javascript
-this.data[i0 * this.stride[0] + i1 * this.stride[1] + i2 * this.stide[2] ....]
-```
-
-Where `i0, i1, ...` is the index of the element we are accessing.
-
-**Note**: You should *not* assume that `this.stride[this.stride-length-1]=1`.  In general, a view can be arranged in either C/[row major order](http://en.wikipedia.org/wiki/Row-major_order)), FORTRAN/[column major](http://en.wikipedia.org/wiki/Row-major_order#Column-major_order)), or anything in between.  Also, the contents of a view may not be packed tightly, as it could represent some view of a subarray.
-
 ## Why use this library instead of manual management of flat typed arrays?
 
 While you can recreate the functionality of this library using typed arrays and manual index arithmetic, in practice doing that is very tedious and error prone.  It also means that you need to pass around extra semantic information, like the shape of the multidimensional array and it's striding.  Using a view, you can get nearly the same performance as a flat typed array, while still maintaining all of the relevant semantic information.
@@ -287,7 +277,7 @@ The following optimizations are planned:
 
 ## Does this library do any error checking?
 
-No.  Don't write past the bounds of the array or you will crash/corrupt its contents.
+Not on array access.  This would be prohibitively slow.  If you write past the bounds of the array, you will either corrupt the array contents or trigger an exception.
 
 Credits
 =======
