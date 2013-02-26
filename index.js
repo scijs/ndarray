@@ -15,6 +15,9 @@ function wrap(tarray, shape, stride) {
       sz *= shape[i];
     }
   }
+  if(!shape) {
+    shape = [ tarray.length ];
+  }
   switch(shape.length) {
     case 0:
       return new View0(tarray, shape, stride);

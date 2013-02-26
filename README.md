@@ -103,10 +103,62 @@ z.set(0, 1)
 //      z = 1
 ```
 
-API
-===
+Basic Functions
+===============
+### `ndarray(typed_array[, shape, order])`
+
+Creates an n-dimensional array view wrapping the specified typed array.
+
+* `typed_array` is a typed array
+* `shape` is the shape of the view (Default: `[typed_array].length`)
+* `order` is an ordered list giving the order of the coordinates for the typed array.  (Default: row major, or `[shape.length-1, shape.length-2, ..., 1, 0]`)
+
+Returns an n-dimensional array view of the buffer
+
+### `ndarray.dtype(array)`
+
+Returns the data type of the underlying array.  The result is one of the following strings: `int8`, `int16`, `int32`, `uint8`, `uint16`, `uint32`, `float32`, `float64`.
+
+### `ndarray.zeros(shape[, dtype, order])`
+
+Creates an array filled with zeros.
+
+* `shape` is the shape of the array to create
+* `dtype` is the datatype of the array to create.  Must be one of the types specified in the above list.
+* `order` is the order of the components of the array.
+
+Returns a view of a newly allocated array.
 
 
+View Properties
+===============
+
+### `data`
+The underlying typed array of the multidimensional array
+
+### `shape`
+The shape of the multidimensional array
+
+### `stride`
+The stride of the typed array
+
+### `get(i,j,k,...)`
+Retrieves an element from the array
+
+### `set(i,j,k,..., v)`
+Sets an element in the array to value `v`
+
+### `clone([o0, o1, o2, ... ])`
+Makes a copy of the array with an optionally specified ordering
+
+### `assign(other)`
+Copies the contents of `other` into this view
+
+### `lo(i,j,k,...)`
+Returns a new view of a shifted subarray
+
+### `hi(i,j,k,...)`
+Returns a new view of a truncated subarray
 
 FAQ
 ===
