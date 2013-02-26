@@ -69,7 +69,7 @@ function dtype(view) {
 
 function zeros(shape, ndtype, order) {
   if(!ndtype) {
-    ndtype = "float64";
+    ndtype = DTYPE.FLOAT64;
   }
   //Default row-major order
   if(!order) {
@@ -121,6 +121,9 @@ function zeros(shape, ndtype, order) {
 
 
 module.exports = wrap;
-module.exports.DTYPE = DTYPE;
 module.exports.zeros = zeros;
 module.exports.dtype = dtype;
+module.exports.DTYPE = DTYPE;
+Object.keys(DTYPE).each(function(k) {
+  module.exports[k] = DTYPE[k];
+});

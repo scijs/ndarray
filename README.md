@@ -6,16 +6,101 @@ Basic Usage
 ===========
 First, install the library using npm:
 
-    npm install ndarray
+```sh
+npm install ndarray
+```
 
 Then you can use it in your projects as follows:
 
-    var ndarray = require("ndarray");
+```javascript
+var ndarray = require("ndarray")
+```
     
+To create an array full of zeros, you just call `ndarray.zeros()`.  For example, this makes a 128x128 array of floats:
+
+```javascript
+var img = ndarray.zeros([128, 128], ndarray.FLOAT32)
+```
+
+You can also wrap existing typed arrays in ndarrays.  For example, here is how you can turn a length 4 typed array into an nd-array:
+
+```javascript
+var mat = ndarray(new Float64Array([1, 0, 0, 1]), [2,2])
+```
+
+Once you have an nd-array you can access elements using `.set` and `.get`.  For example, here is some code to apply a box filter to an image using these routines:
+
+```javascript
+var A = ndarray.zeros([128,128])
+var B = ndarray.zeros([128,128])
+
+for(var i=1; i<127; ++i) {
+  for(var j=1; j<127; ++j) {
+    var s = 0;
+    for(var dx=-1; dx<=1; ++dx) {
+      for(var dy=-1; dy<=1; ++dy) {
+        s += A.get(i+dx, j+dy)
+      }
+    }
+    B.set(i,j,s/9.0)
+  }
+}
+```
+
+You can also pull out views of ndarrays without copying the underlying elements.  Here is an example showing how to update part of a subarray:
+
+```javascript
+var x = ndarray.zeros([5, 5])
+var y = x.view().hi(4,4).lo(1,1)
+
+for(var i=0; i<y.shape[0]; ++i) {
+  for(var j=0; j<y.shape[1]; ++j) {
+    y.set(i,j) = 1
+  }
+}
+
+//Now:
+//    x = 0 0 0 0 0
+//        0 1 1 1 0
+//        0 1 1 1 0
+//        0 1 1 1 0
+//        0 0 0 0 0
+```
+
+It is also possible to do bulk assignment to views of ndarrays:
+
+
+```javascript
+var x = ndarray.zeros([5,5])
+var y = ndarray.zeros([3,3])
+for(var i=0; i<y.shape[0]; ++i) {
+  for(var j=0; j<y.shape[1]; ++j) {
+    y.set(i,j,1)
+  }
+}
+
+x.view().hi(3,3).assign(y)
+x.view().lo(2,2).assign(y)
+
+//Now:
+//    x = 1 1 1 0 0
+//        1 1 1 0 0
+//        1 1 1 1 1
+//        0 0 1 1 1
+//        0 0 1 1 1
+```
+
+And you can also make copies of arrays:
+
+```javascript
+var z = x.clone()
+```
+
 
 API
 ===
-* *to be written*
+
+
 
 FAQ
 ===
