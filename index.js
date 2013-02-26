@@ -16,14 +16,12 @@ function wrap(tarray, shape, stride) {
     }
   }
   switch(shape.length) {
-  /*
     case 0:
       return new View0(tarray, shape, stride);
     case 1:
       return new View1(tarray, shape, stride);
     case 2:
       return new View2(tarray, shape, stride);
-  */
     default:
       return new ViewN(tarray, shape, stride);
   }
@@ -47,7 +45,7 @@ function dtype(view) {
   } else if(view.data instanceof Int8Array) {
     return "int8";
   }
-  return "unknown";
+  return null;
 }
 
 function zeros(shape, dtype, order) {
@@ -94,7 +92,7 @@ function zeros(shape, dtype, order) {
       buf = new Float64Array(size);
     break;
     default:
-      buf = new Array(size);
+      //BAD TYPE!
     break;
   }
   return wrap(buf, shape, stride);

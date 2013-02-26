@@ -18,9 +18,9 @@ for(var i=0; i<y.shape[0]; ++i) {
   }
 }
 
-console.log(y)
+//console.log(y)
 
-x.hi(3,3).assign(y)
+x.hi(2,2).assign(y)
 x.lo(2,2).assign(y)
 
-console.log(x);
+console.log(x.hi(3,3));
