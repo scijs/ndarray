@@ -267,17 +267,14 @@ Numeric.js is a fantastic library, and has many useful features for numerical co
 
 ## What optimizations does this library use?
 
-The following optimizations are planned:
-
-* Typed array back storage
-* 0-allocation accessor interface
+* Typed array storage
 * In place slicing (ie `subarray()` like semantics)
 * Optimized classes for low dimensional views (shape.length <= 4)
-* Cache oblivious view assignment and copying
+* Cache oblivious view assignment and copying (partially implemented)
 
 ## Does this library do any error checking?
 
-Not on array access.  This would be prohibitively slow.  If you write past the bounds of the array, you will either corrupt the array contents or trigger an exception.
+Not on array access or slicing.  This would be prohibitively slow.  If you write past the bounds of the array, you will either corrupt the array contents or trigger an exception.  The array constructors are properly validated though, since these operations are relatively infrequent.
 
 Credits
 =======
