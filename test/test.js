@@ -31,7 +31,7 @@ for(var i=0; i<x.shape[0]; ++i) {
   }
 }
 
-console.log(x)
+console.log(x.toString())
 y.assign(x)
-console.log(y)
+console.log(y.toString())
 
