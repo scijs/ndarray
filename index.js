@@ -1,5 +1,7 @@
 "use strict";
 
+var tools = require("./lib/tools.js");
+
 var View0 = require("./lib/view0.js");
 var View1 = require("./lib/view1.js");
 var View2 = require("./lib/view2.js");
@@ -125,21 +127,8 @@ function zeros(shape, dtype, order) {
   return wrap(buf, shape, stride, 0);
 }
 
-function compare1st(a, b) {
-  return a[0] - b[0];
-}
-
 function order(view) {
-  var terms = new Array(view.shape.length);
-  for(var i=0; i<terms.length; ++i) {
-    terms[i] = [Math.abs(view.stride[i]), i];
-  }
-  terms.sort(compare1st);
-  var result = new Array(view.shape.length);
-  for(var i=0; i<result.length; ++i) {
-    result[i] = terms[i][1];
-  }
-  return result;
+  return tools.order(view.stride);
 }
 
 module.exports = wrap;
