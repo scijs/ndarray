@@ -8,6 +8,8 @@ for(var i=0; i<y.shape[0]; ++i) {
     y.set(i,j, 1)
   }
 }
+console.log(y.toString())
+console.log(x.toString())
 
 
 var x = ndarray.zeros([5,5])

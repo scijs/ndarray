@@ -60,14 +60,12 @@ function wrap(tarray, shape, stride, offset) {
     throw new Error("Offset out of range");
   }
   switch(shape.length) {
-    /*
     case 0:
-      return new View0(tarray, shape, stride);
+      return new View0(tarray);
     case 1:
-      return new View1(tarray, shape, stride);
+      return new View1(tarray, shape, stride, offset);
     case 2:
-      return new View2(tarray, shape, stride);
-    */
+      return new View2(tarray, shape, stride, offset);
     default:
       return new ViewN(tarray, shape, stride, offset);
   }
