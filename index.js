@@ -28,6 +28,16 @@ function arrayDType(data) {
   return null;
 }
 
+function eor(shape, stride, offset) {
+  for(var i=0; i<shape.length; ++i) {
+    if(shape[i] === 0) {
+      return 0
+    }
+    offset += (shape[i]-1) * stride[i]
+  }
+  return offset
+}
+
 //Wraps a typed array as an ndarray
 function wrap(tarray, shape, stride, offset) {
   if(!arrayDType(tarray)) {
@@ -56,8 +66,17 @@ function wrap(tarray, shape, stride, offset) {
   }
   if(typeof(offset) === "undefined") {
     offset = 0;
-  } else if(offset >= tarray.length || offset < 0) {
-    throw new Error("Offset out of range");
+  }
+  if(tarray.length > 0) {
+    if(offset < 0 || offset >= tarray.length) {
+      throw new Error("Offset out of range")
+    }
+    var e = eor(shape, stride, offset)
+    if(e < 0 || e >= tarray.length) {
+      throw new Error("Array shape out of bounds")
+    }
+  } else {
+    offset = 0;
   }
   switch(shape.length) {
     case 0:

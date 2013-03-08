@@ -67,30 +67,7 @@ for(var i=0; i<y.shape[0]; ++i) {
 //        0 0 0 0 0
 ```
 
-It is also possible to do bulk assignment to views of ndarrays:
-
-
-```javascript
-var x = ndarray.zeros([5,5])
-var y = ndarray.zeros([3,3])
-for(var i=0; i<y.shape[0]; ++i) {
-  for(var j=0; j<y.shape[1]; ++j) {
-    y.set(i,j,1)
-  }
-}
-
-x.hi(3,3).assign(y)
-x.lo(2,2).assign(y)
-
-//Now:
-//    x = 1 1 1 0 0
-//        1 1 1 0 0
-//        1 1 1 1 1
-//        0 0 1 1 1
-//        0 0 1 1 1
-```
-
-And you can also make copies of arrays:
+Finally, you can also make copies of arrays:
 
 ```javascript
 var x = ndarray.zeros([1])
@@ -161,7 +138,10 @@ Keeping a separate stride means that we can use the same data structure to suppo
 
 
 ## Element Access
-To access elements of the array, you can use the `set/get` methods.  In psuedocode, the way these are implemented is as follows:
+To access elements of the array, you can use the `set/get` methods:
+
+### `array.get(i,j,...)`
+Retrieves element `i,j,...` from the array.  In psuedocode, this is implemented as follows:
 
 ```javascript
 function get(i,j, ...) {
@@ -169,15 +149,14 @@ function get(i,j, ...) {
 }
 ```
 
-And similarly for `get`:
+### `array.set(i,j ..., v)`
+Sets element `i,j,...` to `v`. Again, in psuedocode this works like this:
 
 ```javascript
 function set(i,j, ..., v) {
   return this.data[this.offset + this.stride[0] * i + this.stride[1] * j + ... ] = v;
 }
 ```
-
-Understanding how views are laid out in memory is important if you are going to use the library.
 
 ## Slicing
 Given a view, we can change the indexing by shifting, truncating or permuting the strides.  This lets us perform operations like array reversals or matrix transpose in **constant time** (well, technically `O(shape.length)`, but since shape.length is typically less than 4, it might as well be).  To make life simpler, the following interfaces are exposed:
@@ -221,20 +200,11 @@ Or if you have a 3D volume image, you can shift the axes using more generic tran
 volume.transpose(2, 0, 1)
 ```
 
-## Bulk Operations
-Finally, array views expose a few bulk memory operations.
+## Miscellaneous
+Finally, there are a few odd ball methods for debugging arrays:
 
-### `array.clone([o0, o1, o2, ... ])`
-Makes a copy of the array with an optionally specified ordering
-
-### `array.assign(other)`
-Copies the contents of `other` into this view.
-
-**TODO:**  Eventually make this support in place moves so you can use it to transpose matrices.  ie:
-
-```javascript
-M.transpose(1,0).assign(M)
-```
+### `array.toString()`
+Makes a human readable stringified version of the contents of the view.
 
 
 FAQ
@@ -250,7 +220,10 @@ To expose a simple, low level interface for working with contiguous blocks of me
 * Mesh processing
 * Scientific computing (ie finite difference based PDE solvers)
 
-This is **not** a linear algebra library, and does not implement things like component-wise arithmetic or tensor operations.  (Though it should be possible to build such features on top of this library as separate module.)  For now, the best option if you need those features would be to use [numeric.js](http://www.numericjs.com/).
+This is **not** a linear algebra library, and does not implement things like component-wise arithmetic or tensor operations, though you can use it to do that stuff if you like.  If you are interested in those things, check out the following packages which are built on top of ndarray:
+
+* [cwise](http://github.com/mikolalysenko/cwise)
+* [ndarray-ops](http://github.com/mikolalysenko/ndarray-ops)
 
 ## Why use this library instead of manual management of flat typed arrays?
 
@@ -258,10 +231,10 @@ While you can recreate the functionality of this library using typed arrays and 
 
 ## Why use this library instead of numeric.js?
 
-Numeric.js is a fantastic library, and has many useful features for numerical computing.  If you are working with sparse linear systems, need to do quadratic programming or solve some other complicated problem it should be your go-to library.  However, numeric.js uses arrays-of-native-arrays to encode multidimensional arrays.  Doing this presents several problems:
+Numeric.js is a fantastic library, and has many useful features for numerical computing.  If you are working with sparse linear systems, or need to solve a linear/quadratic programming problem it should be your go-to library.  However, numeric.js uses arrays-of-native-arrays to encode multidimensional arrays, which makes it suboptimal for image processing and solving PDEs on grids. The reasons for this are as follows:
 
 * Native arrays are much slower than typed arrays. [Proof](https://github.com/mikolalysenko/ndarray-experiments)
-* Allocating an array of native-arrays induces an overhead of O(shape.length^2) extra independent JavaScript objects.  Not only does this greatly increase the amount of memory they consume, but it also prevents them from scaling with block size (leading to cache performance problems).
+* Allocating an array of native-arrays induces an overhead of O(n^{d-1}) extra independent JavaScript objects.  Not only does this greatly increase the amount of memory consumed, but it also prevents them from scaling with block size (leading to cache performance problems).
 * Slicing arrays-of-arrays is an O(n) operation, while resizing a view is only O(1) and can be done without allocating any intermediate objects.
 * Arrays-of-arrays can not be directly uploaded to WebGL, and instead require a costly "unboxing" step to convert them into a typed array.
 
@@ -270,11 +243,11 @@ Numeric.js is a fantastic library, and has many useful features for numerical co
 * Typed array storage
 * In place slicing (ie `subarray()` like semantics)
 * Optimized classes for low dimensional views (shape.length <= 4)
-* Cache oblivious view assignment and copying (partially implemented)
+* Cache oblivious view assignment and copying (implemented in `cwise`)
 
 ## Does this library do any error checking?
 
-Not on array access or slicing.  This would be prohibitively slow.  If you write past the bounds of the array, you will either corrupt the array contents or trigger an exception.  The array constructors are properly validated though, since these operations are relatively infrequent.
+The constructors are validated, but slicing and element access are not, since this would be prohibitively slow.  If you write past the bounds of the array, you will corrupt the contents of the underlying array object.
 
 Credits
 =======

@@ -1,12 +1,12 @@
 {
   "name": "ndarray",
-  "version": "0.0.2",
+  "version": "0.2.0",
   "description": "Multidimensional Arrays",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
-  "dependencies": {},
+  "dependencies": { },
   "devDependencies": {
     "tap": "~0.4.0"
   },
