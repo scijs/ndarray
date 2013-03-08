@@ -67,19 +67,6 @@ for(var i=0; i<y.shape[0]; ++i) {
 //        0 0 0 0 0
 ```
 
-Finally, you can also make copies of arrays:
-
-```javascript
-var x = ndarray.zeros([1])
-var z = x.clone()
-z.set(0, 1)
-
-//Now:
-//      x = 0
-//
-//      z = 1
-```
-
 Basic Functions
 ===============
 ### `ndarray(typed_array[, shape, stride, offset])`
