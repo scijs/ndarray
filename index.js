@@ -43,7 +43,7 @@ function wrap(tarray, shape, stride, offset) {
   if(!arrayDType(tarray)) {
     throw new Error("Input is not a typed array");
   }
-  if(typeof(shape) === "undefined") {
+  if(!shape) {
     shape = [ tarray.length ];
   } else {
     var tsz = 1;
@@ -54,7 +54,7 @@ function wrap(tarray, shape, stride, offset) {
       throw new Error("Array shape out of bounds");
     }
   }
-  if(typeof(stride) === "undefined") {
+  if(!stride) {
     stride = new Array(shape.length);
     var sz = 1;
     for(var i=shape.length-1; i>=0; --i) {
@@ -64,7 +64,7 @@ function wrap(tarray, shape, stride, offset) {
   } else if(stride.length !== shape.length) {
     throw new Error("Bad stride length");
   }
-  if(typeof(offset) === "undefined") {
+  if(!offset) {
     offset = 0;
   }
   if(tarray.length > 0) {
