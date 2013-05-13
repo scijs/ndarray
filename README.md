@@ -19,7 +19,7 @@ var ndarray = require("ndarray")
 To create an array full of zeros, you just call `ndarray.zeros()`.  For example, this makes a 128x128 array of floats:
 
 ```javascript
-var img = ndarray.zeros([128, 128], ndarray.FLOAT32)
+var img = ndarray.zeros([128, 128], "float32")
 ```
 
 You can also wrap existing typed arrays in ndarrays.  For example, here is how you can turn a length 4 typed array into an nd-array:
