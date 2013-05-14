@@ -187,6 +187,16 @@ Or if you have a 3D volume image, you can shift the axes using more generic tran
 volume.transpose(2, 0, 1)
 ```
 
+### `array.pick(p0, p1, ...)`
+You can also pull out a subarray from an ndarray by fixing a particular axis.  The way this works is you specify the direction you are picking by giving a list of values.  For example, if you have an image stored as an nxmx3 array you can pull out the channel as follows:
+
+```javascript
+var red   = image.pick(-1, -1, 0)
+var green = image.pick(-1, -1, 1)
+var blue  = image.pick(-1, -1, 2)
+```
+
+
 ## Miscellaneous
 Finally, there are a few odd ball methods for debugging arrays:
 
