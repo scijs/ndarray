@@ -28,7 +28,44 @@ test("zeros", function(t) {
   t.end()
 })
 
+test("pick", function(t) {
+
+  var x = ndarray.zeros([5, 5])
+  
+  x.set(0, 0, 1)
+  x.set(4, 0, 5)
+  x.set(0, 4, 10)
+  
+  var y = x.pick(0)
+  t.equals(y.get(0), 1)
+  t.equals(y.get(1), 0)
+  t.equals(y.get(2), 0)
+  t.equals(y.get(3), 0)
+  t.equals(y.get(4), 10)
+  t.equals(y.shape.join(","), "5")
+
+  y = x.pick(-1, 0)
+  t.equals(y.get(0), 1)
+  t.equals(y.get(1), 0)
+  t.equals(y.get(2), 0)
+  t.equals(y.get(3), 0)
+  t.equals(y.get(4), 5)
+  t.equals(y.shape.join(","), "5")
+  
+  t.end()
+})
+
 test("accessor", function(t) {
+
+  for(var d=1; d<5; ++d) {
+    var shape = new Array(d)
+    for(var i=0; i<d; ++i) {
+      shape[i] = 3
+    }
+    var x = ndarray.zeros(shape)
+    x.set(1,1,1,1,1,1,1,1,1)
+    t.equals(x.get(1,1,1,1,1,1,1), 1)
+  }
 
   t.end()
 })

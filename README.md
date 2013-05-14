@@ -112,6 +112,16 @@ While if the array is in FORTRAN/column-major order, you get:
 ndarray.order(array) == [ 0, 1, ...,  array.shape.length-2, array.shape.length-1 ]
 ```
 
+### `ndarray.ctor(data, shape, stride, offset)`
+Directly constructs a new ndarray without any checking (not recommended, unless you know what you are doing).
+
+* `data` the underlying typed array
+* `shape` shape of typed array
+* `stride` striding of typed array
+* `offset` offset of typed array
+
+**Returns** A new typed array
+
 Views
 =====
 The central concept in `ndarray` is the idea of a view.  The way these work is very similar to [SciPy's array slices](http://docs.scipy.org/doc/numpy/reference/arrays.indexing.html).  Views are references to ranges within typed arrays.  To better understand what this means, let's first look at the properties of the view object.  It has exactly 4 variables:
