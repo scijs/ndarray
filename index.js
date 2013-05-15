@@ -135,8 +135,22 @@ function order(view) {
   return tools.order(view.stride)
 }
 
+function size(view) {
+  var shape = view.shape
+    , d = shape.length
+    , r = 1, i
+  if(d === 0) {
+    return 0
+  }
+  for(i=0; i<d; ++i) {
+    r *= shape[i]
+  }
+  return r
+}
+
 module.exports = wrap
 module.exports.zeros = zeros
 module.exports.dtype = dtype
 module.exports.order = order
+module.exports.size  = size
 module.exports.ctor  = makeView

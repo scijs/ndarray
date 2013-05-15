@@ -70,6 +70,12 @@ test("accessor", function(t) {
   t.end()
 })
 
+test("size", function(t) {
+  var x = ndarray.zeros([2, 3, 5])
+  t.equals(ndarray.size(x), 2*3*5)
+  t.end()
+})
+
 test("slicing", function(t) {
 
   t.end()

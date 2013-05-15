@@ -94,6 +94,14 @@ Creates an array filled with zeros.
 
 Returns a view of a newly allocated array.
 
+
+### `ndarray.size(array)`
+Computes the size of the flattened ndarray
+
+* `array` is a view of an nd-array
+
+**Returns** The number of elements in the array.
+
 ### `ndarray.order(array)`
 
 Returns the order of the array represented as a permutation.
