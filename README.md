@@ -130,6 +130,14 @@ Directly constructs a new ndarray without any checking (not recommended, unless 
 
 **Returns** A new typed array
 
+### `ndarray.stride(shape[, order])`
+Computes the stride for a packed ndarray with the given order.  If the order is not specified row major order is assumed.
+
+* `shape` the shape if the array
+* `order` the order of the stride
+
+**Returns** The stride of the array
+
 Views
 =====
 The central concept in `ndarray` is the idea of a view.  The way these work is very similar to [SciPy's array slices](http://docs.scipy.org/doc/numpy/reference/arrays.indexing.html).  Views are references to ranges within typed arrays.  To better understand what this means, let's first look at the properties of the view object.  It has exactly 4 variables:

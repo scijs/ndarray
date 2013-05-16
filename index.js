@@ -82,17 +82,17 @@ function dtype(view) {
 }
 
 function zeros(shape, dtype, order) {
-  if(typeof(dtype) === "undefined") {
+  if(!dtype) {
     dtype = "float64"
   }
   //Default row-major order
-  if(typeof(order) === "undefined") {
+  if(!order) {
     order = new Array(shape.length)
     for(var i=shape.length-1, j=0; i>=0; --i, ++j) {
       order[j] = i
     }
   }
-  var stride = new Array(shape.length)
+  var stride =  new Array(shape.length)
   var size = 1
   for(var i=0; i<shape.length; ++i) {
     stride[order[i]] = size
@@ -148,9 +148,27 @@ function size(view) {
   return r
 }
 
+function pstride(shape, order) {
+  var i = 0, d = shape.length
+  var result = new Array(d), s = 1
+  if(order) {
+    for(i=0; i<d; ++i) {
+      result[order[i]] = s
+      s *= shape[order[i]]
+    }
+  } else {
+    for(var i=d-1; i>=0; --i) {
+      stride[i] = s
+      s *= shape[i]
+    }
+  }
+  return result
+}
+
 module.exports = wrap
-module.exports.zeros = zeros
-module.exports.dtype = dtype
-module.exports.order = order
-module.exports.size  = size
-module.exports.ctor  = makeView
+module.exports.zeros    = zeros
+module.exports.dtype    = dtype
+module.exports.order    = order
+module.exports.size     = size
+module.exports.stride   = pstride
+module.exports.ctor     = makeView
