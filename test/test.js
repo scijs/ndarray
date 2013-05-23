@@ -76,7 +76,30 @@ test("size", function(t) {
   t.end()
 })
 
-test("slicing", function(t) {
+test("lo", function(t) {
+
+  var x = ndarray.zeros([3, 3])
+    , y = x.lo(1, -1)
+  t.equals(y.shape.join(","), "2,1")
+  t.equals(y.stride.join(","), x.stride.join(","))
+  t.equals(y.offset, 3+2)
+  
+  y.set(0, 0, 1)
+  t.equals(x.get(1, 2), 1)
+
+  t.end()
+})
+
+test("hi", function(t) {
+  var x = ndarray.zeros([3, 3])
+    , y = x.hi(1, -1)
+  t.equals(y.shape.join(","), "1,2")
+  t.equals(y.stride.join(","), x.stride.join(","))
+  t.equals(y.offset, 0)
+
+  y.set(0, 1, 1)
+  t.equals(x.get(0, 1), 1)
+
 
   t.end()
 })
