@@ -1,48 +1,54 @@
 ndarray
 =======
-Multidimensional arrays for JavaScript.
+Multidimensional arrays for JavaScript.  For more discussion regarding the technical details see the following blog posts:
 
-Basic Usage
-===========
-First, install the library using npm:
+* [Implementing multidmeinsional arrays in JavaScript](http://0fps.wordpress.com/2013/05/22/implementing-multidimensional-arrays-in-javascript/)
+* [Cache oblivious array operations](http://0fps.wordpress.com/2013/05/28/cache-oblivious-array-operations/)
+* [ndarray modules](http://0fps.wordpress.com/2013/06/01/ndarray-modules/)
 
-```sh
-npm install ndarray
-```
+A more complete tutorial is forthcoming.
 
-Then you can use it in your projects as follows:
-
-```javascript
-var ndarray = require("ndarray")
-```
-    
-To create an array full of zeros, you just call `ndarray.zeros()`.  For example, this makes a 128x128 array of floats:
-
-```javascript
-var img = ndarray.zeros([128, 128], "float32")
-```
-
-You can also wrap existing typed arrays in ndarrays.  For example, here is how you can turn a length 4 typed array into an nd-array:
+Intro
+=====
+`ndarrays` provide higher dimensional views of 1D arrays.  For example, here is how you can turn a length 4 typed array into an nd-array:
 
 ```javascript
 var mat = ndarray(new Float64Array([1, 0, 0, 1]), [2,2])
+
+//Now:
+//
+// mat = 1 0
+//       0 1
+//
 ```
 
-Once you have an nd-array you can access elements using `.set` and `.get`.  For example, here is some code to apply a box filter to an image using these routines:
+Once you have an nd-array you can access elements using `.set` and `.get`.  For example, here is an implementation of [Conway's game of life](http://en.wikipedia.org/wiki/Conway's_Game_of_Life) using ndarrays:
 
 ```javascript
-var A = ndarray.zeros([128,128])
-var B = ndarray.zeros([128,128])
+function stepLife(next_state, cur_state) {
 
-for(var i=1; i<127; ++i) {
-  for(var j=1; j<127; ++j) {
-    var s = 0;
-    for(var dx=-1; dx<=1; ++dx) {
-      for(var dy=-1; dy<=1; ++dy) {
-        s += A.get(i+dx, j+dy)
+  //Loop over all cells
+  for(var i=1; i<cur_state.shape[0]-1; ++i) {
+    for(var j=1; j<cur_state.shape[1]-1; ++j) {
+
+      //Count neighbors
+      var n = 0
+      for(var dx=-1; dx<=1; ++dx) {
+        for(var dy=-1; dy<=1; ++dy) {
+          if(dx === 0 && dy === 0) {
+            continue
+          }
+          n += cur_state.get(i+dx, j+dy)
+        }
+      }
+      
+      //Update state according to rule
+      if(n === 3 || n === 3 + cur_state.get(i,j)) {
+        next_state.set(i,j,1)
+      } else {
+        next_state.set(i,j,0)
       }
     }
-    B.set(i,j,s/9.0)
   }
 }
 ```
@@ -50,7 +56,7 @@ for(var i=1; i<127; ++i) {
 You can also pull out views of ndarrays without copying the underlying elements.  Here is an example showing how to update part of a subarray:
 
 ```javascript
-var x = ndarray.zeros([5, 5])
+var x = ndarray(new Float32Array(25), [5, 5])
 var y = x.hi(4,4).lo(1,1)
 
 for(var i=0; i<y.shape[0]; ++i) {
@@ -67,88 +73,48 @@ for(var i=0; i<y.shape[0]; ++i) {
 //        0 0 0 0 0
 ```
 
-Basic Functions
-===============
-### `ndarray(typed_array[, shape, stride, offset])`
 
-Creates an n-dimensional array view wrapping the specified typed array.
+Install
+=======
+Install the library using [npm](http://npmjs.org):
 
-* `typed_array` is a typed array
-* `shape` is the shape of the view (Default: `[typed_array].length`)
+```sh
+npm install ndarray
+```
+
+You can also use ndarrays in a browser with any tool that follows the CommonJS/node module conventions.  A simple way to do this directly is to use [browserify](https://github.com/substack/node-browserify).  If you want live-reloading for faster debugging, you check out [beefy](https://github.com/chrisdickinson/beefy).
+
+API
+===
+Once you have ndarray installed, you can use it in your project as follows:
+
+```javascript
+var ndarray = require("ndarray")
+```
+
+## Constructor
+
+### `ndarray(data[, shape, stride, offset])`
+The default `module.exports` method is the constructor for ndarrays.  It creates an n-dimensional array view wrapping an underlying storage type
+
+* `data` is a 1D array storage.  It is either an instance of `Array`, a typed array, or an object that implements `get(), set(), .length`
+* `shape` is the shape of the view (Default: `data.length`)
 * `stride` is the resulting stride of the new array.  (Default: row major)
 * `offset` is the offset to start the view (Default: `0`)
 
-Returns an n-dimensional array view of the buffer
-
-### `ndarray.dtype(array)`
-
-Returns the data type of the underlying array.  The result is one of the following strings: `"int8"`, `"int16"`, `"int32"`, `"uint8"`, `"uint16"`, `"uint32"`, `"float32"`, `"float64"` or `null` (the last one occuring only if the array is invalid).  These correspond to the various [typed arrays](http://www.khronos.org/registry/typedarray/specs/latest/).
-
-### `ndarray.zeros(shape[, dtype, order])`
-
-Creates an array filled with zeros.
-
-* `shape` is the shape of the array to create
-* `dtype` is the datatype of the array to create.  Must be one of the strings specified in the above list. (Default: `"float64"`)
-* `order` is the order of the components of the array, encoded as a permutation.  (Default: row-major)
-
-Returns a view of a newly allocated array.
+**Returns** an n-dimensional array view of the buffer
 
 
-### `ndarray.size(array)`
-Computes the size of the flattened ndarray
+## Members
 
-* `array` is a view of an nd-array
+The central concept in `ndarray` is the idea of a view.  The way these work is very similar to [SciPy's array slices](http://docs.scipy.org/doc/numpy/reference/arrays.indexing.html).  Views are affine projections to 1D storage types.  To better understand what this means, let's first look at the properties of the view object.  It has exactly 4 variables:
 
-**Returns** The number of elements in the array.
-
-### `ndarray.order(array)`
-
-Returns the order of the array represented as a permutation.
-
-* `array` is a view of an nd-array
-
-The result gives you an ordered list, representing the strides sorted in ascending order.  For example, if an array in C/row-major order, then:
-
-```javascript
-ndarray.order(array) == [ array.shape.length-1, array.shape.length-2 ..., 1, 0 ]
-```
-
-While if the array is in FORTRAN/column-major order, you get:
-
-```javascript
-ndarray.order(array) == [ 0, 1, ...,  array.shape.length-2, array.shape.length-1 ]
-```
-
-### `ndarray.ctor(data, shape, stride, offset)`
-Directly constructs a new ndarray without any checking (not recommended, unless you know what you are doing).
-
-* `data` the underlying typed array
-* `shape` shape of typed array
-* `stride` striding of typed array
-* `offset` offset of typed array
-
-**Returns** A new typed array
-
-### `ndarray.stride(shape[, order])`
-Computes the stride for a packed ndarray with the given order.  If the order is not specified row major order is assumed.
-
-* `shape` the shape if the array
-* `order` the order of the stride
-
-**Returns** The stride of the array
-
-Views
-=====
-The central concept in `ndarray` is the idea of a view.  The way these work is very similar to [SciPy's array slices](http://docs.scipy.org/doc/numpy/reference/arrays.indexing.html).  Views are references to ranges within typed arrays.  To better understand what this means, let's first look at the properties of the view object.  It has exactly 4 variables:
-
-* `array.data` - The underlying typed array of the multidimensional array
-* `array.shape` - The shape of the typed array, encodes dimensions
+* `array.data` - The underlying 1D storage for the multidimensional array
+* `array.shape` - The shape of the typed array
 * `array.stride` - The layout of the typed array in memory
 * `array.offset` - The starting offset of the array in memory
 
 Keeping a separate stride means that we can use the same data structure to support both [row major and column major storage](http://en.wikipedia.org/wiki/Row-major_order)
-
 
 ## Element Access
 To access elements of the array, you can use the `set/get` methods:
@@ -170,6 +136,16 @@ function set(i,j, ..., v) {
   return this.data[this.offset + this.stride[0] * i + this.stride[1] * j + ... ] = v;
 }
 ```
+
+## Properties
+
+
+### `array.dtype`
+
+### `array.size`
+
+### `array.order`
+
 
 ## Slicing
 Given a view, we can change the indexing by shifting, truncating or permuting the strides.  This lets us perform operations like array reversals or matrix transpose in **constant time** (well, technically `O(shape.length)`, but since shape.length is typically less than 4, it might as well be).  To make life simpler, the following interfaces are exposed:
@@ -217,60 +193,10 @@ volume.transpose(2, 0, 1)
 You can also pull out a subarray from an ndarray by fixing a particular axis.  The way this works is you specify the direction you are picking by giving a list of values.  For example, if you have an image stored as an nxmx3 array you can pull out the channel as follows:
 
 ```javascript
-var red   = image.pick(-1, -1, 0)
-var green = image.pick(-1, -1, 1)
-var blue  = image.pick(-1, -1, 2)
+var red   = image.pick(null, null, 0)
+var green = image.pick(null, null, 1)
+var blue  = image.pick(null, null, 2)
 ```
-
-
-## Miscellaneous
-Finally, there are a few odd ball methods for debugging arrays:
-
-### `array.toString()`
-Makes a human readable stringified version of the contents of the view.
-
-
-FAQ
-===
-
-## What are the goals of this library?
-
-To expose a simple, low level interface for working with contiguous blocks of memory.  The intended applications for this code are:
-
-* WebGL interoperability
-* Image processing
-* Volume graphics
-* Mesh processing
-* Scientific computing (ie finite difference based PDE solvers)
-
-This is **not** a linear algebra library, and does not implement things like component-wise arithmetic or tensor operations, though you can use it to do that stuff if you like.  If you are interested in those things, check out the following packages which are built on top of ndarray:
-
-* [cwise](http://github.com/mikolalysenko/cwise)
-* [ndarray-ops](http://github.com/mikolalysenko/ndarray-ops)
-
-## Why use this library instead of manual management of flat typed arrays?
-
-While you can recreate the functionality of this library using typed arrays and manual index arithmetic, in practice doing that is very tedious and error prone.  It also means that you need to pass around extra semantic information, like the shape of the multidimensional array and it's striding.  Using a view, you can get nearly the same performance as a flat typed array, while still maintaining all of the relevant semantic information.
-
-## Why use this library instead of numeric.js?
-
-Numeric.js is a fantastic library, and has many useful features for numerical computing.  If you are working with sparse linear systems, or need to solve a linear/quadratic programming problem it should be your go-to library.  However, numeric.js uses arrays-of-native-arrays to encode multidimensional arrays, which makes it suboptimal for image processing and solving PDEs on grids. The reasons for this are as follows:
-
-* Native arrays are much slower than typed arrays. [Proof](https://github.com/mikolalysenko/ndarray-experiments)
-* Allocating an array of native-arrays induces an overhead of O(n^{d-1}) extra independent JavaScript objects.  Not only does this greatly increase the amount of memory consumed, but it also prevents them from scaling with block size (leading to cache performance problems).
-* Slicing arrays-of-arrays is an O(n) operation, while resizing a view is only O(1) and can be done without allocating any intermediate objects.
-* Arrays-of-arrays can not be directly uploaded to WebGL, and instead require a costly "unboxing" step to convert them into a typed array.
-
-## What optimizations does this library use?
-
-* Typed array storage
-* In place slicing (ie `subarray()` like semantics)
-* Optimized classes for low dimensional views (shape.length <= 4)
-* Cache oblivious view assignment and copying (implemented in `cwise`)
-
-## Does this library do any error checking?
-
-The constructors are validated, but slicing and element access are not, since this would be prohibitively slow.  If you write past the bounds of the array, you will corrupt the contents of the underlying array object.
 
 Credits
 =======
