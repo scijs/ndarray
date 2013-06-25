@@ -64,7 +64,7 @@ function compileConstructor(dtype, dimension) {
     code.push("this.shape=b")
     code.push("this.stride=c")
     code.push("this.offset=d")
-  coude.push("}")
+  code.push("}")
   
   //Create prototype
   code.push(["var proto=",className,".prototype"].join(""))
@@ -83,7 +83,7 @@ function compileConstructor(dtype, dimension) {
   code.push("Object.defineProperty(proto,'order',{get:ORDER})")
   
   //view.set(i0, ..., v):
-  code.push(["proto.set=function(", args.join(","), ",v){"].join(""))
+  code.push(["proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))
   code.push("var a=this.stride")
   if(useGetters) {
     code.push(["return this.data.set(", index_str, ",v)}"].join(""))
@@ -92,7 +92,7 @@ function compileConstructor(dtype, dimension) {
   }
   
   //view.get(i0, ...):
-  code.push(["proto.get=function(", args.join(","), "){"].join(""))
+  code.push(["proto.get=function ",className,"_get(", args.join(","), "){"].join(""))
   code.push("var a=this.stride")
   if(useGetters) {
     code.push(["return this.data.get(", index_str, ")}"].join(""))
@@ -101,7 +101,7 @@ function compileConstructor(dtype, dimension) {
   }
   
   //view.hi():
-  code.push(["proto.hi=function(",args.join(","),"){var a=this.shape"].join(""))
+  code.push(["proto.hi=function ",className,"_hi(",args.join(","),"){var a=this.shape"].join(""))
   var hiShape = new Array(dimension)
   for(var i=0; i<dimension; ++i) {
     hiShape[i] = ["typeof i", i, "!=='number'?a[", i, "]:i", i,"|0"].join("")
@@ -109,7 +109,7 @@ function compileConstructor(dtype, dimension) {
   code.push(["return new ", className, "(this.data,[", hiShape.join(","), "],this.stride.slice(0),this.offset)}"].join(""))
   
   //view.lo():
-  code.push(["proto.lo=function(",args.join(","),"){var a=this.shape.slice(0),b=this.offset,c=this.stride.slice(0),d=0"].join(""))
+  code.push(["proto.lo=function ",className,"_lo(",args.join(","),"){var a=this.shape.slice(0),b=this.offset,c=this.stride.slice(0),d=0"].join(""))
   for(var i=0; i<dimension; ++i) {
     code.push(["if(typeof i", i, "==='number'){"].join(""))
     code.push(["d=i",i,"|0"].join(""))
@@ -120,15 +120,15 @@ function compileConstructor(dtype, dimension) {
   code.push(["return new ", className, "(this.data,a,c,b)}"].join(""))
   
   //view.step():
-  code.push(["proto.step=function(",args.join(","),"){var a=this.shape.slice(0),b=this.stride.slice(0),c=this.offset,d=0,ceil=Math.ceil"].join(""))
+  code.push(["proto.step=function ",className,"_step(",args.join(","),"){var a=this.shape.slice(0),b=this.stride.slice(0),c=this.offset,d=0,ceil=Math.ceil"].join(""))
   for(var i=0; i<dimension; ++i) {
     code.push("if(typeof i"+i+"==='number'){")
       code.push("d=i"+i+"|0")
       code.push("if(d<0){")
         code.push("c+=b["+i+"]*(a["+i+"]-1)")
-        code.push("a["+i+"]=ceil(-a["+i+"]/d")
+        code.push("a["+i+"]=ceil(-a["+i+"]/d)")
       code.push("}else{")
-        code.push("a["+i+"]=ceil(a["+i+"]/d")
+        code.push("a["+i+"]=ceil(a["+i+"]/d)")
       code.push("}")
       code.push("b["+i+"]*=d")
     code.push("}")
@@ -142,10 +142,10 @@ function compileConstructor(dtype, dimension) {
     tShape[i] = ["a[i", i, "|0]"].join("")
     tStride[i] = ["b[i", i, "|0]"].join("")
   }
-  code.push(["proto.transpose=function(",args,"){var a=this.shape,b=this.stride;return new ", className, "(this.data,[", tShape.join(","), "],[", tStride.join(","), "],this.offset)}"].join(""))
+  code.push(["proto.transpose=function ",className,"_transpose(",args,"){var a=this.shape,b=this.stride;return new ", className, "(this.data,[", tShape.join(","), "],[", tStride.join(","), "],this.offset)}"].join(""))
   
   //view.pick():
-  code.push(["proto.pick=function(",args,"){var a=[],b=[],c=this.offset,d=this.shape,e=this.stride"].join(""))
+  code.push(["proto.pick=function ",className,"_pick(",args,"){var a=[],b=[],c=this.offset,d=this.shape,e=this.stride"].join(""))
   for(var i=0; i<dimension; ++i) {
     code.push(["if(i",i,">=0){c=(c+e[",i,"]*i",i,")|0}else{a.push(d[",i,"]);b.push(e[",i,"])}"].join(""))
   }
@@ -193,7 +193,7 @@ function constructNDArray(data, shape, stride, offset) {
   }
   ctor = compileConstructor(dtype, dimension)
   CACHED_CONSTRUCTORS[ctor_name] = ctor
-  return ctor
+  return new ctor(data, shape, stride, offset)
 }
 
 function wrappedNDArrayCtor(data, shape, stride, offset) {

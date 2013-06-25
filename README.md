@@ -5,6 +5,7 @@ Multidimensional arrays for JavaScript.  For more discussion regarding the techn
 * [Implementing multidmeinsional arrays in JavaScript](http://0fps.wordpress.com/2013/05/22/implementing-multidimensional-arrays-in-javascript/)
 * [Cache oblivious array operations](http://0fps.wordpress.com/2013/05/28/cache-oblivious-array-operations/)
 * [ndarray modules](http://0fps.wordpress.com/2013/06/01/ndarray-modules/)
+* [ndarray benchmarks](https://github.com/mikolalysenko/ndarray-experiments)
 
 A more complete tutorial is forthcoming.
 
@@ -197,6 +198,8 @@ var red   = image.pick(null, null, 0)
 var green = image.pick(null, null, 1)
 var blue  = image.pick(null, null, 2)
 ```
+
+As the above example illustrates, passing a non-numeric value to a coordinate in pick skips that index.
 
 Credits
 =======
