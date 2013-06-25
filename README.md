@@ -139,14 +139,31 @@ function set(i,j, ..., v) {
 ```
 
 ## Properties
-
+The following properties are created using Object.defineProperty and do not take up any physical memory.  They can be useful in calculations involving ndarrays
 
 ### `array.dtype`
+Returns a string representing the undelying data type of the ndarray.  Excluding generic data stores these types are compatible with [`typedarray-pool`](https://github.com/mikolalysenko/typedarray-pool).  This is mapped according to the following rules:
+
+Data type | String
+--------: | :-----
+`Int8Array` | "int8"
+`Int16Array` | "int16"
+`Int32Array` | "int32"
+`Uint8Array` | "uint8"
+`Uint16Array` | "uint16"
+`Uint32Array` | "uint32"
+`Float32Array` | "float32"
+`Float64Array` | "float64"
+`Array` | "array"
+Other | "generic"
+
+Generic arrays access elements of the underlying 1D store using get()/set() instead of array accessors.
 
 ### `array.size`
+Returns the size of the array in logical elements.
 
 ### `array.order`
-
+Returns the order of elements in the array
 
 ## Slicing
 Given a view, we can change the indexing by shifting, truncating or permuting the strides.  This lets us perform operations like array reversals or matrix transpose in **constant time** (well, technically `O(shape.length)`, but since shape.length is typically less than 4, it might as well be).  To make life simpler, the following interfaces are exposed:

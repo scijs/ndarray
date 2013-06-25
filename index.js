@@ -49,7 +49,7 @@ function compileConstructor(dtype, dimension) {
     var compiledProc = new Function(ZeroArray+"ZeroArray.prototype.dtype='"+dtype+"'")
     return compiledProc()
   }
-  var useGetters = dtype === "custom"
+  var useGetters = dtype === "generic"
   var code = ["'use strict'"]
   var indices = iota(dimension)
   var args = indices.map(function(i) { return "i"+i })
@@ -179,7 +179,7 @@ function arrayDType(data) {
   } else if(data instanceof Array) {
     return "array"
   }
-  return "custom"
+  return "generic"
 }
 
 var CACHED_CONSTRUCTORS = {}
