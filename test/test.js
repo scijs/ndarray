@@ -1,5 +1,5 @@
 var test = require("tape")
-var ndarray = require("../index.js");
+var ndarray = require("../ndarray.js");
 
 test("ndarray", function(t) {
 
