@@ -1,10 +1,9 @@
-var test = require("tap").test
+var test = require("tape")
 var ndarray = require("../index.js");
 
 test("ndarray", function(t) {
 
   var p = ndarray(new Float32Array([1,2,3,4]), [2,2])
-  console.log(p)
   t.equals(p.shape.length, 2)
   t.equals(p.shape[0], 2)
   t.equals(p.shape[1], 2)
@@ -12,6 +11,14 @@ test("ndarray", function(t) {
   t.equals(p.stride[1], 1)
 
   t.end()
+})
+
+test("order", function(t) {
+
+  var p = ndarray(new Float32Array(100), [3,3,3], [1,9,12])
+  t.equals(p.order.join(","), "0,1,2")
+  t.end()
+
 })
 
 test("pick", function(t) {

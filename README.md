@@ -9,8 +9,8 @@ Multidimensional arrays for JavaScript.  For more discussion regarding the techn
 
 A more complete tutorial is forthcoming.
 
-Intro
-=====
+Examples
+========
 `ndarrays` provide higher dimensional views of 1D arrays.  For example, here is how you can turn a length 4 typed array into an nd-array:
 
 ```javascript

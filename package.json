@@ -1,8 +1,8 @@
 {
   "name": "ndarray",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "Multidimensional Arrays",
-  "main": "index.js",
+  "main": "ndarray.js",
   "directories": {
     "test": "test"
   },
@@ -10,7 +10,8 @@
     "iota-array": "~0.0.0"
   },
   "devDependencies": {
-    "tap": "~0.4.0"
+    "tap": "~0.4.0",
+    "tape": "~1.0.4"
   },
   "scripts": {
     "test": "tap test/*.js"

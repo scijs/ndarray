@@ -80,7 +80,13 @@ function compileConstructor(dtype, dimension) {
   code.push("}})")
   
   //view.order:
-  code.push("Object.defineProperty(proto,'order',{get:ORDER})")
+  if(dimension===1) {
+    code.push("proto.order=[0]")
+  } else if(dimension === 2) {
+    code.push("Object.defineProperty(proto,'order',{get:function(){return this.stride[0]>this.stride[1]?[1,0]:[0,1]}})")
+  } else {
+    code.push("Object.defineProperty(proto,'order',{get:ORDER})")
+  }
   
   //view.set(i0, ..., v):
   code.push(["proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))
