@@ -82,7 +82,7 @@ Install the library using [npm](http://npmjs.org):
 npm install ndarray
 ```
 
-You can also use ndarrays in a browser with any tool that follows the CommonJS/node module conventions.  A simple way to do this directly is to use [browserify](https://github.com/substack/node-browserify).  If you want live-reloading for faster debugging, you check out [beefy](https://github.com/chrisdickinson/beefy).
+You can also use ndarrays in a browser with any tool that follows the CommonJS/node module conventions.  The most direct way to do this is to use [browserify](https://github.com/substack/node-browserify).  If you want live-reloading for faster debugging, check out [beefy](https://github.com/chrisdickinson/beefy).
 
 API
 ===
