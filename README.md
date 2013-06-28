@@ -2,7 +2,8 @@ ndarray
 =======
 Multidimensional arrays for JavaScript.  For more discussion regarding the technical details see the following blog posts:
 
-* [Implementing multidmeinsional arrays in JavaScript](http://0fps.wordpress.com/2013/05/22/implementing-multidimensional-arrays-in-javascript/)
+* [ndarray tutorial](https://github.com/mikolalysenko/ndarray-tutorial)  (Work in progress)
+* [Implementing multidimensional arrays in JavaScript](http://0fps.wordpress.com/2013/05/22/implementing-multidimensional-arrays-in-javascript/)
 * [Cache oblivious array operations](http://0fps.wordpress.com/2013/05/28/cache-oblivious-array-operations/)
 * [ndarray modules](http://0fps.wordpress.com/2013/06/01/ndarray-modules/)
 * [ndarray benchmarks](https://github.com/mikolalysenko/ndarray-experiments)
