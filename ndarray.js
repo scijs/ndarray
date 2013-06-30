@@ -27,8 +27,8 @@ this.shape = b;\
 this.stride = c;\
 this.offset = d;\
 }\
-ZeroArray.prototype.size=0\
-ZeroArray.prototype.order=[]\
+ZeroArray.prototype.size=function(){return 0}\
+ZeroArray.prototype.order=function(){return []}\
 ZeroArray.prototype.get=function() {\
 return Number.NaN\
 }\
@@ -72,21 +72,40 @@ function compileConstructor(dtype, dimension) {
   //view.dtype:
   code.push(["proto.dtype='", dtype, "'"].join(""))
   
-  //view.size:
-  code.push("Object.defineProperty(proto,'size',{get:function(){var s=this.shape")
+  //view.size():
+  code.push(["Object.defineProperty(proto,'size',{get:function ",className,"_size(){var s=this.shape"].join(""))
   code.push(["return ", indices.map(function(i) {
     return ["s[",i,"]"].join("")
   }).join("*")].join(""))
   code.push("}})")
   
-  //view.order:
-  if(dimension===1) {
-    code.push("proto.order=[0]")
+  //view.order():
+  code.push(["Object.defineProperty(proto,'order',{get:function ",className,"_order(){"].join(""))
+  if(dimension === 1) {
+    code.push("return [0]")
   } else if(dimension === 2) {
-    code.push("Object.defineProperty(proto,'order',{get:function(){return this.stride[0]>this.stride[1]?[1,0]:[0,1]}})")
+    code.push("return (this.stride[0]>this.stride[1])?[1,0]:[0,1]")
+  } else if(dimension === 3) {
+    code.push("var s=this.stride")
+    code.push("if(s[0] > s[1]){")
+      code.push("if(s[1]>s[2]){")
+        code.push("return [2,1,0]")
+      code.push("}else if(s[0]>s[2]){")
+        code.push("return [1,2,0]")
+      code.push("}else{")
+        code.push("return [1,0,2]")
+      code.push("}")
+    code.push("}else if(s[0]>s[2]){")
+      code.push("return [2,0,1]")
+    code.push("}else if(s[2]>s[1]){")
+      code.push("return [0,1,2]")
+    code.push("}else{")
+      code.push("return [0,2,1]")
+    code.push("}")
   } else {
-    code.push("Object.defineProperty(proto,'order',{get:ORDER})")
+    code.push("return ORDER(this.stride)")
   }
+  code.push("}})")
   
   //view.set(i0, ..., v):
   code.push(["proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))
