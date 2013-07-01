@@ -139,6 +139,13 @@ test("step", function(t) {
   for(var i=0; i<5; ++i) {
     t.equals(w.get(i), 2*i)
   }
+  
+  
+  var a = w.step(-1), b = y.step(2)
+  t.same(a.shape, b.shape)
+  for(var i=0; i<5; ++i) {
+    t.equals(a.get(i)+1, b.get(i))
+  }
 
   t.end()
 })
