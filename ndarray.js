@@ -27,19 +27,17 @@ this.shape = b;\
 this.stride = c;\
 this.offset = d\
 };\
-ZeroArray.prototype.size=0;\
-ZeroArray.prototype.order=[];\
-ZeroArray.prototype.get=function() {\
+var proto=ZeroArray.prototype;\
+proto.size=0;\
+proto.order=[];\
+proto.get=proto.set=function() {\
 return Number.NaN\
 };\
-ZeroArray.prototype.set=function(v) {\
-return Number.NaN\
-};\
-ZeroArray.prototype.lo=\
-ZeroArray.prototype.hi=\
-ZeroArray.prototype.transpose=\
-ZeroArray.prototype.step=\
-ZeroArray.prototype.pick=function() {\
+proto.lo=\
+proto.hi=\
+proto.transpose=\
+proto.step=\
+proto.pick=function() {\
 return new ZeroArray(this.data,this.shape,this.stride,this.offset)\
 }"
 
@@ -62,12 +60,13 @@ function compileConstructor(dtype, dimension) {
   var className = ["View", dimension, "d", dtype].join("")
   
   //Create constructor
-  code.push(["function ", className, "(a,b,c,d){"].join(""))
-    code.push("this.data=a")
-    code.push("this.shape=b")
-    code.push("this.stride=c")
-    code.push("this.offset=d")
-  code.push("}")
+  code.push([
+"function ", className, "(a,b,c,d){\
+this.data=a;\
+this.shape=b;\
+this.stride=c;\
+this.offset=d;\
+}"].join(""))
   
   //Create prototype
   code.push(["var proto=",className,".prototype"].join(""))
@@ -76,12 +75,11 @@ function compileConstructor(dtype, dimension) {
   code.push(["proto.dtype='", dtype, "'"].join(""))
   
   //view.size:
-  code.push(["Object.defineProperty(proto,'size',{get:function ",className,"_size(){var s=this.shape"].join(""))
-  code.push("return " + indices.map(function(i) {
-    return ["s[",i,"]"].join("")
-  }).join("*"))
-  code.push("}})")
-  
+  code.push(["Object.defineProperty(proto,'size',{get:function ",className,"_size(){\
+var s=this.shape;\
+return ", indices.map(function(i) { return ["s[",i,"]"].join("") }).join("*"),
+"}})"].join(""))
+
   //view.order:
   if(dimension === 1) {
     code.push("proto.order=[0]")
@@ -90,7 +88,7 @@ function compileConstructor(dtype, dimension) {
     if(dimension < 4) {
       code.push(["function ",className,"_order(){"].join(""))
       if(dimension === 2) {
-        code.push("return (this.stride[0]>this.stride[1])?[1,0]:[0,1]")
+        code.push("return (this.stride[0]>this.stride[1])?[1,0]:[0,1]}})")
       } else if(dimension === 3) {
         code.push(
 "var s=this.stride;\
@@ -108,18 +106,17 @@ return [2,0,1];\
 return [0,1,2];\
 }else{\
 return [0,2,1];\
-}")
+}}})")
       }
-      code.push("}")
     } else {
-      code.push("ORDER")
+      code.push("ORDER})")
     }
-    code.push("})")
   }
   
   //view.set(i0, ..., v):
-  code.push(["proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))
-  code.push("var a=this.stride")
+  code.push([
+"proto.set=function ",className,"_set(", args.join(","), ",v){\
+var a=this.stride"].join(""))
   if(useGetters) {
     code.push(["return this.data.set(", index_str, ",v)}"].join(""))
   } else {
@@ -127,8 +124,8 @@ return [0,2,1];\
   }
   
   //view.get(i0, ...):
-  code.push(["proto.get=function ",className,"_get(", args.join(","), "){"].join(""))
-  code.push("var a=this.stride")
+  code.push(["proto.get=function ",className,"_get(", args.join(","), "){\
+var a=this.stride"].join(""))
   if(useGetters) {
     code.push(["return this.data.get(", index_str, ")}"].join(""))
   } else {
@@ -146,27 +143,28 @@ return [0,2,1];\
   //view.lo():
   code.push(["proto.lo=function ",className,"_lo(",args.join(","),"){var a=this.shape.slice(0),b=this.offset,c=this.stride.slice(0),d=0"].join(""))
   for(var i=0; i<dimension; ++i) {
-    code.push(["if(typeof i", i, "==='number'){"].join(""))
-    code.push(["d=i",i,"|0"].join(""))
-    code.push(["b+=c[",i,"]*d"].join(""))
-    code.push(["a[",i,"]-=d"].join(""))
-    code.push("}")
+    code.push([
+"if(typeof i", i, "==='number'){\
+d=i",i,"|0;\
+b+=c[",i,"]*d;\
+a[",i,"]-=d}"].join(""))
   }
   code.push(["return new ", className, "(this.data,a,c,b)}"].join(""))
   
   //view.step():
   code.push(["proto.step=function ",className,"_step(",args.join(","),"){var a=this.shape.slice(0),b=this.stride.slice(0),c=this.offset,d=0,ceil=Math.ceil"].join(""))
   for(var i=0; i<dimension; ++i) {
-    code.push("if(typeof i"+i+"==='number'){")
-      code.push("d=i"+i+"|0")
-      code.push("if(d<0){")
-        code.push("c+=b["+i+"]*(a["+i+"]-1)")
-        code.push("a["+i+"]=ceil(-a["+i+"]/d)")
-      code.push("}else{")
-        code.push("a["+i+"]=ceil(a["+i+"]/d)")
-      code.push("}")
-      code.push("b["+i+"]*=d")
-    code.push("}")
+    code.push([
+"if(typeof i",i,"==='number'){\
+d=i",i,"|0;\
+if(d<0){\
+c+=b[",i,"]*(a[",i,"]-1);\
+a[",i,"]=ceil(-a[",i,"]/d)\
+}else{\
+a[",i,"]=ceil(a[",i,"]/d)\
+}\
+b[",i,"]*=d\
+}"].join(""))
   }
   code.push(["return new ", className, "(this.data,a,b,c)}"].join(""))
   
