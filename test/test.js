@@ -115,3 +115,30 @@ test("hi", function(t) {
 
   t.end()
 })
+
+
+test("step", function(t) {
+
+  var x = ndarray(new Float32Array(10))
+  for(var i=0; i<10; ++i) {
+    x.set(i, i)
+  }
+  
+  var y = x.step(-1)
+  for(var i=0; i<10; ++i) {
+    t.equals(y.get(i), (9-i))
+  }
+  
+  var z = y.step(-1)
+  for(var i=0; i<10; ++i) {
+    t.equals(z.get(i), i)
+  }
+  
+  var w = x.step(2)
+  t.equals(w.shape[0], 5)
+  for(var i=0; i<5; ++i) {
+    t.equals(w.get(i), 2*i)
+  }
+
+  t.end()
+})
