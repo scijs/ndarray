@@ -25,16 +25,16 @@ var ZeroArray = "function ZeroArray(a,b,c,d) {\
 this.data = a;\
 this.shape = b;\
 this.stride = c;\
-this.offset = d;\
-}\
-ZeroArray.prototype.size=function(){return 0}\
-ZeroArray.prototype.order=function(){return []}\
+this.offset = d\
+};\
+ZeroArray.prototype.size=0;\
+ZeroArray.prototype.order=[];\
 ZeroArray.prototype.get=function() {\
 return Number.NaN\
-}\
+};\
 ZeroArray.prototype.set=function(v) {\
 return Number.NaN\
-}\
+};\
 ZeroArray.prototype.lo=\
 ZeroArray.prototype.hi=\
 ZeroArray.prototype.transpose=\
@@ -46,7 +46,10 @@ return new ZeroArray(this.data,this.shape,this.stride,this.offset)\
 function compileConstructor(dtype, dimension) {
   //Special case for 0d arrays
   if(dimension === 0) {
-    var compiledProc = new Function(ZeroArray+"ZeroArray.prototype.dtype='"+dtype+"'")
+    var compiledProc = new Function([
+      ZeroArray,
+      "ZeroArray.prototype.dtype='"+dtype+"'",
+      "return ZeroArray"].join("\n"))
     return compiledProc()
   }
   var useGetters = dtype === "generic"
@@ -72,40 +75,47 @@ function compileConstructor(dtype, dimension) {
   //view.dtype:
   code.push(["proto.dtype='", dtype, "'"].join(""))
   
-  //view.size():
+  //view.size:
   code.push(["Object.defineProperty(proto,'size',{get:function ",className,"_size(){var s=this.shape"].join(""))
-  code.push(["return ", indices.map(function(i) {
+  code.push("return " + indices.map(function(i) {
     return ["s[",i,"]"].join("")
-  }).join("*")].join(""))
+  }).join("*"))
   code.push("}})")
   
-  //view.order():
-  code.push(["Object.defineProperty(proto,'order',{get:function ",className,"_order(){"].join(""))
+  //view.order:
   if(dimension === 1) {
-    code.push("return [0]")
-  } else if(dimension === 2) {
-    code.push("return (this.stride[0]>this.stride[1])?[1,0]:[0,1]")
-  } else if(dimension === 3) {
-    code.push("var s=this.stride")
-    code.push("if(s[0] > s[1]){")
-      code.push("if(s[1]>s[2]){")
-        code.push("return [2,1,0]")
-      code.push("}else if(s[0]>s[2]){")
-        code.push("return [1,2,0]")
-      code.push("}else{")
-        code.push("return [1,0,2]")
-      code.push("}")
-    code.push("}else if(s[0]>s[2]){")
-      code.push("return [2,0,1]")
-    code.push("}else if(s[2]>s[1]){")
-      code.push("return [0,1,2]")
-    code.push("}else{")
-      code.push("return [0,2,1]")
-    code.push("}")
+    code.push("proto.order=[0]")
   } else {
-    code.push("return ORDER(this.stride)")
+    code.push("Object.defineProperty(proto,'order',{get:")
+    if(dimension < 4) {
+      code.push(["function ",className,"_order(){"].join(""))
+      if(dimension === 2) {
+        code.push("return (this.stride[0]>this.stride[1])?[1,0]:[0,1]")
+      } else if(dimension === 3) {
+        code.push(
+"var s=this.stride;\
+if(s[0] > s[1]){\
+if(s[1]>s[2]){\
+return [2,1,0];\
+}else if(s[0]>s[2]){\
+return [1,2,0];\
+}else{\
+return [1,0,2];\
+}\
+}else if(s[0]>s[2]){\
+return [2,0,1];\
+}else if(s[2]>s[1]){\
+return [0,1,2];\
+}else{\
+return [0,2,1];\
+}")
+      }
+      code.push("}")
+    } else {
+      code.push("ORDER")
+    }
+    code.push("})")
   }
-  code.push("}})")
   
   //view.set(i0, ..., v):
   code.push(["proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))

@@ -1,5 +1,8 @@
 var test = require("tape")
-var ndarray = require("../ndarray.js");
+var perm = require("permutation-rank")
+var invPerm = require("invert-permutation")
+var dup = require("dup")
+var ndarray = require("../ndarray.js")
 
 test("ndarray", function(t) {
 
@@ -14,11 +17,17 @@ test("ndarray", function(t) {
 })
 
 test("order", function(t) {
-
-  var p = ndarray(new Float32Array(100), [3,3,3], [1,9,12])
-  t.equals(p.order.join(","), "0,1,2")
+  t.same(ndarray([0]).pick(0).order, [])
+  var f = 1
+  for(var d=1; d<=5; ++d) {
+    f *= d
+    for(var r=0; r<f; ++r) {
+      var p = perm.unrank(d, r)
+      var x = ndarray([1], dup(f), p)
+      t.same(x.order, invPerm(p.slice(0)), x.stride.join(","))
+    }
+  }
   t.end()
-
 })
 
 test("pick", function(t) {
@@ -48,8 +57,8 @@ test("pick", function(t) {
   t.end()
 })
 
-test("accessor", function(t) {
 
+test("accessor", function(t) {
   for(var d=1; d<5; ++d) {
     var shape = new Array(d)
     for(var i=0; i<d; ++i) {
@@ -57,7 +66,12 @@ test("accessor", function(t) {
     }
     var x = ndarray(new Float32Array(1000), shape)
     x.set(1,1,1,1,1,1,1,1,1)
-    t.equals(x.get(1,1,1,1,1,1,1), 1)
+    t.equals(x.get(1,1,1,1,1,1,1), 1, "get/set array d=" + d)
+    
+    var array1D = ndarray(new Int8Array(1000))
+    var x = ndarray(array1D, shape)
+    x.set(1,1,1,1,1,1,1,1,1)
+    t.equals(x.get(1,1,1,1,1,1,1), 1, "get/set generic d=" + d)
   }
 
   t.end()
@@ -66,6 +80,11 @@ test("accessor", function(t) {
 test("size", function(t) {
   var x = ndarray(new Float32Array(100), [2, 3, 5])
   t.equals(x.size, 2*3*5)
+  t.equals(x.pick(0,0,0).size, 0)
+  for(var d=1; d<5; ++d) {
+    var x = ndarray(new Float32Array(256), dup(d,2))
+    t.equals(x.size, 1<<d, "size d="+d)
+  }
   t.end()
 })
 
