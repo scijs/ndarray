@@ -124,7 +124,7 @@ Retrieves element `i,j,...` from the array.  In psuedocode, this is implemented 
 
 ```javascript
 function get(i,j, ...) {
-  return this.data[this.offset + this.stride[0] * i + this.stride[1] * j + ... ];
+  return this.data[this.offset + this.stride[0] * i + this.stride[1] * j + ... ]
 }
 ```
 
@@ -133,7 +133,7 @@ Sets element `i,j,...` to `v`. Again, in psuedocode this works like this:
 
 ```javascript
 function set(i,j, ..., v) {
-  return this.data[this.offset + this.stride[0] * i + this.stride[1] * j + ... ] = v;
+  return this.data[this.offset + this.stride[0] * i + this.stride[1] * j + ... ] = v
 }
 ```
 
