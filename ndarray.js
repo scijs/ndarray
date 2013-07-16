@@ -72,9 +72,9 @@ function compileConstructor(dtype, dimension) {
   //Create constructor for view
   var indices = iota(dimension)
   var args = indices.map(function(i) { return "i"+i })
-  var index_str = "(this.offset+" + indices.map(function(i) {
+  var index_str = "this.offset+" + indices.map(function(i) {
         return ["this._stride", i, "*i",i].join("")
-      }).join("+")+")|0"
+      }).join("+")
   var className = ["View", dimension, "d", dtype].join("")
   code.push(["function ", className, "(a,",
     indices.map(function(i) {

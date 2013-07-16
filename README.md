@@ -27,9 +27,13 @@ Once you have an nd-array you can access elements using `.set` and `.get`.  For 
 ```javascript
 function stepLife(next_state, cur_state) {
 
+  //Get array shape
+  var nx = cur_state.shape[0], 
+      ny = cur_state.shape[1]
+
   //Loop over all cells
-  for(var i=1; i<cur_state.shape[0]-1; ++i) {
-    for(var j=1; j<cur_state.shape[1]-1; ++j) {
+  for(var i=1; i<nx-1; ++i) {
+    for(var j=1; j<ny-1; ++j) {
 
       //Count neighbors
       var n = 0
@@ -104,7 +108,6 @@ The default `module.exports` method is the constructor for ndarrays.  It creates
 
 **Returns** an n-dimensional array view of the buffer
 
-
 ## Members
 
 The central concept in `ndarray` is the idea of a view.  The way these work is very similar to [SciPy's array slices](http://docs.scipy.org/doc/numpy/reference/arrays.indexing.html).  Views are affine projections to 1D storage types.  To better understand what this means, let's first look at the properties of the view object.  It has exactly 4 variables:
@@ -163,6 +166,9 @@ Returns the size of the array in logical elements.
 
 ### `array.order`
 Returns the order of the stride of the array, sorted in ascending length. The first element is the first index of the shortest stride and the last is the index the longest stride.
+
+### `array.dimension`
+Returns the dimension of the array.  Basically a shortcut for `array.shape.length`
 
 ## Slicing
 Given a view, we can change the indexing by shifting, truncating or permuting the strides.  This lets us perform operations like array reversals or matrix transpose in **constant time** (well, technically `O(shape.length)`, but since shape.length is typically less than 4, it might as well be).  To make life simpler, the following interfaces are exposed:
