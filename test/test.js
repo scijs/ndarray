@@ -16,6 +16,19 @@ test("ndarray", function(t) {
   t.end()
 })
 
+test("shape/stride", function(t) {
+
+  var p = ndarray(new Float32Array(100), [3,3,3], [3,2,1])
+  
+  t.equals(p.shape[0], 3)
+  p.shape[0] = 1
+  t.equals(p.shape[0], 1)
+  t.equals(p.shape[1], 3)
+  t.equals(p.shape[2], 3)
+  
+  t.end()
+})
+
 test("order", function(t) {
   t.same(ndarray([0]).pick(0).order, [])
   var f = 1
@@ -23,7 +36,7 @@ test("order", function(t) {
     f *= d
     for(var r=0; r<f; ++r) {
       var p = perm.unrank(d, r)
-      var x = ndarray([1], dup(f), p)
+      var x = ndarray([1], dup(d), p)
       t.same(x.order, invPerm(p.slice(0)), x.stride.join(","))
     }
   }

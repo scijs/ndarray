@@ -2,6 +2,22 @@
 
 var iota = require("iota-array")
 
+var arrayMethods = [
+  "concat",
+  "join",
+  "slice",
+  "toString",
+  "indexOf",
+  "lastIndexOf",
+  "forEach",
+  "every",
+  "some",
+  "filter",
+  "map",
+  "reduce",
+  "reduceRight"
+]
+
 function compare1st(a, b) {
   return a[0] - b[0]
 }
@@ -21,14 +37,14 @@ function order() {
   return result
 }
 
-var ZeroArray = "function ZeroArray(a,b,c,d) {\
+var ZeroArray = "function ZeroArray(a,d) {\
 this.data = a;\
-this.shape = b;\
-this.stride = c;\
 this.offset = d\
 };\
 var proto=ZeroArray.prototype;\
 proto.size=0;\
+proto.shape=[];\
+proto.stride=[];\
 proto.order=[];\
 proto.get=proto.set=function() {\
 return Number.NaN\
@@ -47,37 +63,67 @@ function compileConstructor(dtype, dimension) {
     var compiledProc = new Function([
       ZeroArray,
       "ZeroArray.prototype.dtype='"+dtype+"'",
-      "return ZeroArray"].join("\n"))
+      "return function construct_ZeroArray(a,b,c,d){return new ZeroArray(a,d)}"].join("\n"))
     return compiledProc()
   }
-  var useGetters = dtype === "generic"
+  var useGetters = (dtype === "generic")
   var code = ["'use strict'"]
+    
+  //Create constructor for view
   var indices = iota(dimension)
   var args = indices.map(function(i) { return "i"+i })
-  var index_str = "this.offset+" + indices.map(function(i) {
-        return ["a[", i, "]*i",i].join("")
-      }).join("+")
+  var index_str = "(this.offset+" + indices.map(function(i) {
+        return ["this._stride", i, "*i",i].join("")
+      }).join("+")+")|0"
   var className = ["View", dimension, "d", dtype].join("")
+  code.push(["function ", className, "(a,",
+    indices.map(function(i) {
+      return "b"+i
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "c"+i
+    }).join(","), ",d){this.data=a"].join(""))
+  for(var i=0; i<dimension; ++i) {
+    code.push(["this._shape",i,"=b",i,"|0"].join(""))
+  }
+  for(var i=0; i<dimension; ++i) {
+    code.push(["this._stride",i,"=c",i,"|0"].join(""))
+  }
+  code.push("this.offset=d|0}")
   
-  //Create constructor
-  code.push([
-"function ", className, "(a,b,c,d){\
-this.data=a;\
-this.shape=b;\
-this.stride=c;\
-this.offset=d;\
-}"].join(""))
-  
-  //Create prototype
+  //Get prototype
   code.push(["var proto=",className,".prototype"].join(""))
   
   //view.dtype:
   code.push(["proto.dtype='", dtype, "'"].join(""))
+  code.push("proto.dimension="+dimension)
+  
+  //view.stride and view.shape
+  var strideClassName = ["VStride", dimension, "d", dtype].join("")
+  var shapeClassName = ["VShape", dimension, "d", dtype].join("")
+  var props = {"stride":strideClassName, "shape":shapeClassName}
+  for(var prop in props) {
+    var arrayName = props[prop]
+    code.push(["function ", arrayName, "(v) {Object.defineProperty(this,'_v',{value:v,enumerable:false,writable:false,configurable:false})} var aproto=", arrayName, ".prototype"].join(""))
+    code.push(["aproto.length=",dimension].join(""))
+    for(var i=0; i<dimension; ++i) {
+      code.push(["Object.defineProperty(aproto,", i, ",{get:function(){return this._v._", prop, i, "},set:function(v){return this._v._", prop, i, "=v|0},enumerable:true})"].join(""))
+    }
+    for(var i=0; i<arrayMethods.length; ++i) {
+      if(arrayMethods[i] in Array.prototype) {
+        code.push(["aproto.", arrayMethods[i], "=Array.prototype.", arrayMethods[i]].join(""))
+      }
+    }
+    code.push(["Object.defineProperty(proto,'",prop,"',{get:function ", arrayName, "_get(){return new ", arrayName, "(this)},set: function ", arrayName, "_set(v){"].join(""))
+    for(var i=0; i<dimension; ++i) {
+      code.push(["this._", prop, i, "=v[", i, "]|0"].join(""))
+    }
+    code.push("return v}})")
+  }
   
   //view.size:
   code.push(["Object.defineProperty(proto,'size',{get:function ",className,"_size(){\
-var s=this.shape;\
-return ", indices.map(function(i) { return ["s[",i,"]"].join("") }).join("*"),
+return ", indices.map(function(i) { return ["this._shape", i].join("") }).join("*"),
 "}})"].join(""))
 
   //view.order:
@@ -88,21 +134,21 @@ return ", indices.map(function(i) { return ["s[",i,"]"].join("") }).join("*"),
     if(dimension < 4) {
       code.push(["function ",className,"_order(){"].join(""))
       if(dimension === 2) {
-        code.push("return (this.stride[0]>this.stride[1])?[1,0]:[0,1]}})")
+        code.push("return (Math.abs(this._stride0)>Math.abs(this._stride1))?[1,0]:[0,1]}})")
       } else if(dimension === 3) {
         code.push(
-"var s=this.stride;\
-if(s[0] > s[1]){\
-if(s[1]>s[2]){\
+"var s0=Math.abs(this._stride0),s1=Math.abs(this._stride1),s2=Math.abs(this._stride2);\
+if(s0>s1){\
+if(s1>s2){\
 return [2,1,0];\
-}else if(s[0]>s[2]){\
+}else if(s0>s2){\
 return [1,2,0];\
 }else{\
 return [1,0,2];\
 }\
-}else if(s[0]>s[2]){\
+}else if(s0>s2){\
 return [2,0,1];\
-}else if(s[2]>s[1]){\
+}else if(s2>s1){\
 return [0,1,2];\
 }else{\
 return [0,2,1];\
@@ -115,8 +161,7 @@ return [0,2,1];\
   
   //view.set(i0, ..., v):
   code.push([
-"proto.set=function ",className,"_set(", args.join(","), ",v){\
-var a=this.stride"].join(""))
+"proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))
   if(useGetters) {
     code.push(["return this.data.set(", index_str, ",v)}"].join(""))
   } else {
@@ -124,8 +169,7 @@ var a=this.stride"].join(""))
   }
   
   //view.get(i0, ...):
-  code.push(["proto.get=function ",className,"_get(", args.join(","), "){\
-var a=this.stride"].join(""))
+  code.push(["proto.get=function ",className,"_get(", args.join(","), "){"].join(""))
   if(useGetters) {
     code.push(["return this.data.get(", index_str, ")}"].join(""))
   } else {
@@ -133,40 +177,61 @@ var a=this.stride"].join(""))
   }
   
   //view.hi():
-  code.push(["proto.hi=function ",className,"_hi(",args.join(","),"){var a=this.shape"].join(""))
-  var hiShape = new Array(dimension)
-  for(var i=0; i<dimension; ++i) {
-    hiShape[i] = ["typeof i", i, "!=='number'?a[", i, "]:i", i,"|0"].join("")
-  }
-  code.push(["return new ", className, "(this.data,[", hiShape.join(","), "],this.stride.slice(0),this.offset)}"].join(""))
+  code.push(["proto.hi=function ",className,"_hi(",args.join(","),"){return new ", className, "(this.data,",
+    indices.map(function(i) {
+      return ["typeof i", i, "!=='number'?this._shape", i, ":i", i,"|0"].join("")
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "this._stride"+i
+    }).join(","), ",this.offset)}"].join(""))
   
   //view.lo():
-  code.push(["proto.lo=function ",className,"_lo(",args.join(","),"){var a=this.shape.slice(0),b=this.offset,c=this.stride.slice(0),d=0"].join(""))
+  var a_vars = indices.map(function(i) { return "a"+i+"=this._shape"+i })
+  var c_vars = indices.map(function(i) { return "c"+i+"=this._stride"+i })
+  code.push(["proto.lo=function ",className,"_lo(",args.join(","),"){var b=this.offset,d=0,", a_vars.join(","), ",", c_vars.join(",")].join(""))
   for(var i=0; i<dimension; ++i) {
     code.push([
 "if(typeof i", i, "==='number'){\
 d=i",i,"|0;\
-b+=c[",i,"]*d;\
-a[",i,"]-=d}"].join(""))
+b+=c",i,"*d;\
+a",i,"-=d}"].join(""))
   }
-  code.push(["return new ", className, "(this.data,a,c,b)}"].join(""))
+  code.push(["return new ", className, "(this.data,",
+    indices.map(function(i) {
+      return "a"+i
+    }).join(","),",",
+    indices.map(function(i) {
+      return "c"+i
+    }).join(","), ",b)}"].join(""))
   
   //view.step():
-  code.push(["proto.step=function ",className,"_step(",args.join(","),"){var a=this.shape.slice(0),b=this.stride.slice(0),c=this.offset,d=0,ceil=Math.ceil"].join(""))
+  code.push(["proto.step=function ",className,"_step(",args.join(","),"){var ",
+    indices.map(function(i) {
+      return "a"+i+"=this._shape"+i
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "b"+i+"=this._stride"+i
+    }).join(","),",c=this.offset,d=0,ceil=Math.ceil"].join(""))
   for(var i=0; i<dimension; ++i) {
     code.push([
 "if(typeof i",i,"==='number'){\
 d=i",i,"|0;\
 if(d<0){\
-c+=b[",i,"]*(a[",i,"]-1);\
-a[",i,"]=ceil(-a[",i,"]/d)\
+c+=b",i,"*(a",i,"-1);\
+a",i,"=ceil(-a",i,"/d)\
 }else{\
-a[",i,"]=ceil(a[",i,"]/d)\
+a",i,"=ceil(a",i,"/d)\
 }\
-b[",i,"]*=d\
+b",i,"*=d\
 }"].join(""))
   }
-  code.push(["return new ", className, "(this.data,a,b,c)}"].join(""))
+  code.push(["return new ", className, "(this.data,",
+    indices.map(function(i) {
+      return "a" + i
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "b" + i
+    }).join(","), ",c)}"].join(""))
   
   //view.transpose():
   var tShape = new Array(dimension)
@@ -175,21 +240,27 @@ b[",i,"]*=d\
     tShape[i] = ["a[i", i, "|0]"].join("")
     tStride[i] = ["b[i", i, "|0]"].join("")
   }
-  code.push(["proto.transpose=function ",className,"_transpose(",args,"){var a=this.shape,b=this.stride;return new ", className, "(this.data,[", tShape.join(","), "],[", tStride.join(","), "],this.offset)}"].join(""))
+  code.push(["proto.transpose=function ",className,"_transpose(",args,"){var a=this.shape,b=this.stride;return new ", className, "(this.data,", tShape.join(","), ",", tStride.join(","), ",this.offset)}"].join(""))
   
   //view.pick():
-  code.push(["proto.pick=function ",className,"_pick(",args,"){var a=[],b=[],c=this.offset,d=this.shape,e=this.stride"].join(""))
+  code.push(["proto.pick=function ",className,"_pick(",args,"){var a=[],b=[],c=this.offset"].join(""))
   for(var i=0; i<dimension; ++i) {
-    code.push(["if(i",i,">=0){c=(c+e[",i,"]*i",i,")|0}else{a.push(d[",i,"]);b.push(e[",i,"])}"].join(""))
+    code.push(["if(i",i,">=0){c=(c+this._stride",i,"*i",i,")|0}else{a.push(this._shape",i,");b.push(this._stride",i,")}"].join(""))
   }
-  code.push("return CTOR(this.data,a,b,c)}")
+  code.push("var ctor=CTOR_LIST[a.length];return ctor(this.data,a,b,c)}")
     
   //Add return statement
-  code.push("return "+className)
+  code.push(["return function construct_",className,"(data,shape,stride,offset){return new ", className,"(data,",
+    indices.map(function(i) {
+      return "shape["+i+"]"
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "stride["+i+"]"
+    }).join(","), ",offset)}"].join(""))
   
   //Compile procedure
-  var procedure = new Function("CTOR", "ORDER", code.join("\n"))
-  return procedure(constructNDArray, order)
+  var procedure = new Function("CTOR_LIST", "ORDER", code.join("\n"))
+  return procedure(CACHED_CONSTRUCTORS[dtype], order)
 }
 
 function arrayDType(data) {
@@ -215,26 +286,25 @@ function arrayDType(data) {
   return "generic"
 }
 
-var CACHED_CONSTRUCTORS = {}
-function constructNDArray(data, shape, stride, offset) {
-  var dtype = arrayDType(data)
-  var dimension = shape.length
-  var ctor_name = dtype + dimension
-  var ctor = CACHED_CONSTRUCTORS[ctor_name]
-  if(ctor) {
-    return new ctor(data, shape, stride, offset)
-  }
-  ctor = compileConstructor(dtype, dimension)
-  CACHED_CONSTRUCTORS[ctor_name] = ctor
-  return new ctor(data, shape, stride, offset)
+var CACHED_CONSTRUCTORS = {
+  "float32":[],
+  "float64":[],
+  "int8":[],
+  "int16":[],
+  "int32":[],
+  "uint8":[],
+  "uint16":[],
+  "uint32":[],
+  "array":[],
+  "generic":[]
 }
 
 function wrappedNDArrayCtor(data, shape, stride, offset) {
   if(shape === undefined) {
     shape = [ data.length ]
   }
+  var d = shape.length
   if(stride === undefined) {
-    var d = shape.length
     stride = new Array(d)
     for(var i=d-1, sz=1; i>=0; --i) {
       stride[i] = sz
@@ -243,14 +313,19 @@ function wrappedNDArrayCtor(data, shape, stride, offset) {
   }
   if(offset === undefined) {
     offset = 0
-    var d = shape.length
     for(var i=0; i<d; ++i) {
       if(stride[i] < 0) {
         offset -= (shape[i]-1)*stride[i]
       }
     }
   }
-  return constructNDArray(data, shape, stride, offset)
+  var dtype = arrayDType(data)
+  var ctor_list = CACHED_CONSTRUCTORS[dtype]
+  while(ctor_list.length <= d) {
+    ctor_list.push(compileConstructor(dtype, ctor_list.length))
+  }
+  var ctor = ctor_list[d]
+  return ctor(data, shape, stride, offset)
 }
 
 module.exports = wrappedNDArrayCtor
