@@ -12,7 +12,7 @@ test("ndarray", function(t) {
   t.equals(p.shape[1], 2)
   t.equals(p.stride[0], 2)
   t.equals(p.stride[1], 1)
-
+  
   t.end()
 })
 
