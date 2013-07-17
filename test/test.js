@@ -155,7 +155,7 @@ test("step", function(t) {
   
   
   var a = w.step(-1), b = y.step(2)
-  t.same(a.shape, b.shape)
+  t.same(a.shape.toString(), b.shape.toString())
   for(var i=0; i<5; ++i) {
     t.equals(a.get(i)+1, b.get(i))
   }

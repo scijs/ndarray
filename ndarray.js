@@ -104,7 +104,7 @@ function compileConstructor(dtype, dimension) {
   var props = {"stride":strideClassName, "shape":shapeClassName}
   for(var prop in props) {
     var arrayName = props[prop]
-    code.push(["function ", arrayName, "(v) {Object.defineProperty(this,'_v',{value:v,enumerable:false,writable:false,configurable:false})} var aproto=", arrayName, ".prototype"].join(""))
+    code.push(["function ", arrayName, "(v) {this._v=v} var aproto=", arrayName, ".prototype"].join(""))
     code.push(["aproto.length=",dimension].join(""))
     for(var i=0; i<dimension; ++i) {
       code.push(["Object.defineProperty(aproto,", i, ",{get:function(){return this._v._", prop, i, "},set:function(v){return this._v._", prop, i, "=v|0},enumerable:true})"].join(""))
