@@ -106,6 +106,14 @@ function compileConstructor(dtype, dimension) {
     var arrayName = props[prop]
     code.push(["function ", arrayName, "(v) {this._v=v} var aproto=", arrayName, ".prototype"].join(""))
     code.push(["aproto.length=",dimension].join(""))
+    
+    var array_elements = []
+    for(var i=0; i<dimension; ++i) {
+      array_elements.push(["this._v._", prop, i].join(""))
+    }
+    code.push(["aproto.toJSON=function ", arrayName, "_toJSON(){return [", array_elements.join(","), "]}"].join(""))
+    code.push(["aproto.toString=function ", arrayName, "_toJSON(){return [", array_elements.join(","), "].join()}"].join(""))
+    
     for(var i=0; i<dimension; ++i) {
       code.push(["Object.defineProperty(aproto,", i, ",{get:function(){return this._v._", prop, i, "},set:function(v){return this._v._", prop, i, "=v|0},enumerable:true})"].join(""))
     }

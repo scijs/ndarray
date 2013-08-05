@@ -162,3 +162,12 @@ test("step", function(t) {
 
   t.end()
 })
+
+test("toJSON", function(t) {
+
+  var x = ndarray(new Float32Array(10))
+  
+  t.same(JSON.stringify(x.shape), "[10]")
+  
+  t.end()
+})
