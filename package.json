@@ -1,6 +1,6 @@
 {
   "name": "ndarray",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Multidimensional Arrays",
   "main": "ndarray.js",
   "directories": {

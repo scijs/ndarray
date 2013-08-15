@@ -187,7 +187,7 @@ return [0,2,1];\
   //view.hi():
   code.push(["proto.hi=function ",className,"_hi(",args.join(","),"){return new ", className, "(this.data,",
     indices.map(function(i) {
-      return ["typeof i", i, "!=='number'?this._shape", i, ":i", i,"|0"].join("")
+      return ["(typeof i",i,"!=='number'||i",i,"<0)?this._shape", i, ":i", i,"|0"].join("")
     }).join(","), ",",
     indices.map(function(i) {
       return "this._stride"+i
@@ -199,7 +199,7 @@ return [0,2,1];\
   code.push(["proto.lo=function ",className,"_lo(",args.join(","),"){var b=this.offset,d=0,", a_vars.join(","), ",", c_vars.join(",")].join(""))
   for(var i=0; i<dimension; ++i) {
     code.push([
-"if(typeof i", i, "==='number'){\
+"if(typeof i",i,"==='number'&&i",i,">=0){\
 d=i",i,"|0;\
 b+=c",i,"*d;\
 a",i,"-=d}"].join(""))
@@ -253,7 +253,7 @@ b",i,"*=d\
   //view.pick():
   code.push(["proto.pick=function ",className,"_pick(",args,"){var a=[],b=[],c=this.offset"].join(""))
   for(var i=0; i<dimension; ++i) {
-    code.push(["if(i",i,">=0){c=(c+this._stride",i,"*i",i,")|0}else{a.push(this._shape",i,");b.push(this._stride",i,")}"].join(""))
+    code.push(["if(typeof i",i,"==='number'&&i",i,">=0){c=(c+this._stride",i,"*i",i,")|0}else{a.push(this._shape",i,");b.push(this._stride",i,")}"].join(""))
   }
   code.push("var ctor=CTOR_LIST[a.length];return ctor(this.data,a,b,c)}")
     

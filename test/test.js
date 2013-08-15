@@ -67,6 +67,24 @@ test("pick", function(t) {
   t.equals(y.get(4), 5)
   t.equals(y.shape.join(","), "5")
   
+  y = x.pick(undefined, 0)
+  t.equals(y.get(0), 1)
+  t.equals(y.get(1), 0)
+  t.equals(y.get(2), 0)
+  t.equals(y.get(3), 0)
+  t.equals(y.get(4), 5)
+  t.equals(y.shape.join(","), "5")
+
+  y = x.pick(null, 0)
+  t.equals(y.get(0), 1)
+  t.equals(y.get(1), 0)
+  t.equals(y.get(2), 0)
+  t.equals(y.get(3), 0)
+  t.equals(y.get(4), 5)
+  t.equals(y.shape.join(","), "5")
+  
+  
+  
   t.end()
 })
 
@@ -125,6 +143,7 @@ test("hi", function(t) {
   y.set(0, 1, 1)
   t.equals(x.get(0, 1), 1)
 
+  t.equals(x.hi(undefined, 2).shape.join(","), "3,2")
 
   t.end()
 })
