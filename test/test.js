@@ -16,6 +16,32 @@ test("ndarray", function(t) {
   t.end()
 })
 
+test("uint8clamped", function(t) {
+  var p = ndarray(new Uint8ClampedArray([1,2,3,4]), [4])
+  t.equals(p.get(0), 1)
+  t.equals(p.get(1), 2)
+  t.equals(p.get(2), 3)
+  t.equals(p.get(3), 4)
+  p.set(0, 1000)
+  t.equals(p.get(0), 255)
+  p.set(1, -1000)
+  t.equals(p.get(1), 0)
+  t.end()
+})
+
+test("buffer", function(t) {
+  var p = ndarray(new Buffer(5))
+  p.set(0, 1)
+  p.set(1, 2)
+  p.set(2, 3)
+  p.set(3, 4)
+  t.equals(p.get(0), 1)
+  t.equals(p.get(1), 2)
+  t.equals(p.get(2), 3)
+  t.equals(p.get(3), 4)
+  t.end()
+})
+
 test("shape/stride", function(t) {
 
   var p = ndarray(new Float32Array(100), [3,3,3], [3,2,1])

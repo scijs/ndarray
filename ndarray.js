@@ -288,6 +288,10 @@ function arrayDType(data) {
     return "int16"
   } else if(data instanceof Int8Array) {
     return "int8"
+  } else if(data instanceof Uint8ClampedArray) {
+    return "uint8_clamped"
+  } else if((typeof Buffer !== "undefined") && (data instanceof Buffer)) {
+    return "buffer"
   } else if(data instanceof Array) {
     return "array"
   }
@@ -304,6 +308,8 @@ var CACHED_CONSTRUCTORS = {
   "uint16":[],
   "uint32":[],
   "array":[],
+  "uint8_clamped":[],
+  "buffer":[],
   "generic":[]
 }
 

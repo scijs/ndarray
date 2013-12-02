@@ -159,6 +159,8 @@ Data type | String
 `Float32Array` | "float32"
 `Float64Array` | "float64"
 `Array` | "array"
+`Uint8ArrayClamped` | "uint8_clamped"
+`Buffer` | "buffer"
 Other | "generic"
 
 Generic arrays access elements of the underlying 1D store using get()/set() instead of array accessors.
