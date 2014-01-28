@@ -128,16 +128,16 @@ To access elements of the array, you can use the `set/get` methods:
 Retrieves element `i,j,...` from the array.  In psuedocode, this is implemented as follows:
 
 ```javascript
-function get(i,j, ...) {
+function get(i,j,...) {
   return this.data[this.offset + this.stride[0] * i + this.stride[1] * j + ... ]
 }
 ```
 
-### `array.set(i,j ..., v)`
+### `array.set(i,j,...,v)`
 Sets element `i,j,...` to `v`. Again, in psuedocode this works like this:
 
 ```javascript
-function set(i,j, ..., v) {
+function set(i,j,...,v) {
   return this.data[this.offset + this.stride[0] * i + this.stride[1] * j + ... ] = v
 }
 ```
