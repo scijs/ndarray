@@ -142,6 +142,15 @@ function set(i,j, ..., v) {
 }
 ```
 
+### `array.index(i,j, ...)`
+Retrieves the index of the cell in the underlying ndarray.  In JS,
+
+```javascript
+function index(i,j, ...) {
+  return this.offset + this.stride[0] * i + this.stride[1] * j + ...
+}
+```
+
 ## Properties
 The following properties are created using Object.defineProperty and do not take up any physical memory.  They can be useful in calculations involving ndarrays
 

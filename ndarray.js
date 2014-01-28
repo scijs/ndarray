@@ -37,36 +37,43 @@ function order() {
   return result
 }
 
-var ZeroArray = "function ZeroArray(a,d) {\
+function compileConstructor(dtype, dimension) {
+  var className = ["View", dimension, "d", dtype].join("")
+  var useGetters = (dtype === "generic")
+  
+  //Special case for 0d arrays
+  if(dimension === 0) {
+    var code = [
+      "function ", className, "(a,d) {\
 this.data = a;\
 this.offset = d\
 };\
-var proto=ZeroArray.prototype;\
-proto.size=0;\
-proto.shape=[];\
-proto.stride=[];\
+var proto=", className, ".prototype;\
+proto.dtype='", dtype, "';\
+proto.index=function(){return this.offset};\
+proto.dimension=0;\
+proto.size=1;\
+proto.shape=\
+proto.stride=\
 proto.order=[];\
-proto.get=proto.set=function() {\
-return Number.NaN\
-};\
 proto.lo=\
 proto.hi=\
 proto.transpose=\
 proto.step=\
-proto.pick=function() {\
-return new ZeroArray(this.data,this.shape,this.stride,this.offset)\
-}"
-
-function compileConstructor(dtype, dimension) {
-  //Special case for 0d arrays
-  if(dimension === 0) {
-    var compiledProc = new Function([
-      ZeroArray,
-      "ZeroArray.prototype.dtype='"+dtype+"'",
-      "return function construct_ZeroArray(a,b,c,d){return new ZeroArray(a,d)}"].join("\n"))
-    return compiledProc()
+proto.pick=function ", className, "_copy() {\
+return new ", className, "(this.data,this.offset)\
+};\
+proto.get=function ", className, "_get(){\
+return ", (useGetters ? "this.data.get(this.offset)" : "this.data[this.offset]"),
+"};\
+proto.set=function ", className, "_set(v){\
+return ", (useGetters ? "this.data.get(this.offset)" : "this.data[this.offset]"), "=v\
+};\
+return function construct_", className, "(a,b,c,d){return new ", className, "(a,d)}"].join("")
+    var procedure = new Function(code)
+    return procedure()
   }
-  var useGetters = (dtype === "generic")
+
   var code = ["'use strict'"]
     
   //Create constructor for view
@@ -75,7 +82,6 @@ function compileConstructor(dtype, dimension) {
   var index_str = "this.offset+" + indices.map(function(i) {
         return ["this._stride", i, "*i",i].join("")
       }).join("+")
-  var className = ["View", dimension, "d", dtype].join("")
   code.push(["function ", className, "(a,",
     indices.map(function(i) {
       return "b"+i
@@ -184,6 +190,13 @@ return [0,2,1];\
     code.push(["return this.data[", index_str, "]}"].join(""))
   }
   
+  //view.index:
+  code.push([
+    "proto.index=function ",
+      className,
+      "_index(", args.join(), "){return ", 
+      index_str, "}"].join(""))
+
   //view.hi():
   code.push(["proto.hi=function ",className,"_hi(",args.join(","),"){return new ", className, "(this.data,",
     indices.map(function(i) {
@@ -265,7 +278,7 @@ b",i,"*=d\
     indices.map(function(i) {
       return "stride["+i+"]"
     }).join(","), ",offset)}"].join(""))
-  
+
   //Compile procedure
   var procedure = new Function("CTOR_LIST", "ORDER", code.join("\n"))
   return procedure(CACHED_CONSTRUCTORS[dtype], order)

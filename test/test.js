@@ -16,6 +16,33 @@ test("ndarray", function(t) {
   t.end()
 })
 
+test("index", function(t) {
+
+  var p = ndarray(new Float32Array([1,2,3,4]), [2,2])
+
+  t.equals(p.index(0,0), 0)
+  t.equals(p.index(0,1), 1)
+  t.equals(p.index(1,0), 2)
+  t.equals(p.index(1,1), 3)
+  t.end()
+})
+
+test("scalars", function(t) {
+  var p = ndarray(new Float32Array([1,2,3,4]))
+  var c = p.pick(0)
+  t.equals(c.get(), 1)
+  t.equals(c.set(10), 10)
+  t.equals(p.get(0), 10)
+  c = p.pick(3)
+  t.equals(c.index(), 3)
+  t.same(c.shape, [])
+  t.same(c.order, [])
+  t.same(c.stride, [])
+  t.equals(c.get(), 4)
+  t.same(c.lo(), c)
+  t.end()
+})
+
 test("uint8clamped", function(t) {
   var p = ndarray(new Uint8ClampedArray([1,2,3,4]), [4])
   t.equals(p.get(0), 1)
@@ -137,7 +164,7 @@ test("accessor", function(t) {
 test("size", function(t) {
   var x = ndarray(new Float32Array(100), [2, 3, 5])
   t.equals(x.size, 2*3*5)
-  t.equals(x.pick(0,0,0).size, 0)
+  t.equals(x.pick(0,0,0).size, 1)
   for(var d=1; d<5; ++d) {
     var x = ndarray(new Float32Array(256), dup(d,2))
     t.equals(x.size, 1<<d, "size d="+d)
