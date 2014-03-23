@@ -225,13 +225,42 @@ test("step", function(t) {
     t.equals(w.get(i), 2*i)
   }
   
-  
   var a = w.step(-1), b = y.step(2)
   t.same(a.shape.toString(), b.shape.toString())
   for(var i=0; i<5; ++i) {
     t.equals(a.get(i)+1, b.get(i))
   }
 
+  t.end()
+})
+
+test("transpose", function(t) {
+  var x = ndarray(new Array(6), [2,3])
+  var y = x.transpose(1, 0)
+  t.equals(x.shape[0], y.shape[1])
+  t.equals(x.shape[1], y.shape[0])
+  t.equals(x.stride[0], y.stride[1])
+  t.equals(x.stride[1], y.stride[0])
+  
+  var f = 1
+  var shape = []
+  for(var d=1; d<=5; ++d) {
+    shape.push(d)
+    f *= d
+    var x = ndarray(new Array(f), shape, shape)
+    for(var r=0; r<f; ++r) {
+      var p = perm.unrank(d, r)
+      var xt = x.transpose.apply(x, p)
+      var xord = xt.order
+      var pinv = invPerm(p.slice(0))
+      t.same(xord, pinv)
+      for(var i=0; i<d; ++i) {
+        t.equals(xt.shape[i], x.shape[p[i]])
+        t.equals(xt.stride[i], x.stride[p[i]])
+      }
+    }
+  }
+  
   t.end()
 })
 
