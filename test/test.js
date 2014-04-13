@@ -40,6 +40,9 @@ test("scalars", function(t) {
   t.same(c.stride, [])
   t.equals(c.get(), 4)
   t.same(c.lo(), c)
+  t.equals(c + 1, 5)
+  //Test trivial array
+  t.equals(c.pick().dimension, -1)
   t.end()
 })
 

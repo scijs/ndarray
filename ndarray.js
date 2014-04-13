@@ -39,17 +39,37 @@ function order() {
 
 function compileConstructor(dtype, dimension) {
   var className = ["View", dimension, "d", dtype].join("")
+  if(dimension < 0) {
+    className = "View_Nil" + dtype
+  }
   var useGetters = (dtype === "generic")
   
-  //Special case for 0d arrays
-  if(dimension === 0) {
-    var code = [
-      "function ", className, "(a,d) {\
+  if(dimension === -1) {
+    //Special case for trivial arrays
+    var code = 
+      "function "+className+"(a){this.data=a;};\
+var proto="+className+".prototype;\
+proto.dtype='"+dtype+"';\
+proto.index=function(){return -1};\
+proto.size=0;\
+proto.dimension=-1;\
+proto.shape=proto.stride=proto.order=[];\
+proto.lo=proto.hi=proto.transpose=proto.step=\
+function(){return new "+className+"(this.data);};\
+proto.get=proto.set=function(){};\
+proto.pick=function(){return null};\
+return function construct_"+className+"(a){return new "+className+"(a);}"
+    var procedure = new Function(code)
+    return procedure()
+  } else if(dimension === 0) {
+    //Special case for 0d arrays
+    var code =
+      "function "+className+"(a,d) {\
 this.data = a;\
 this.offset = d\
 };\
-var proto=", className, ".prototype;\
-proto.dtype='", dtype, "';\
+var proto="+className+".prototype;\
+proto.dtype='"+dtype+"';\
 proto.index=function(){return this.offset};\
 proto.dimension=0;\
 proto.size=1;\
@@ -59,19 +79,21 @@ proto.order=[];\
 proto.lo=\
 proto.hi=\
 proto.transpose=\
-proto.step=\
-proto.pick=function ", className, "_copy() {\
-return new ", className, "(this.data,this.offset)\
+proto.step=function "+className+"_copy() {\
+return new "+className+"(this.data,this.offset)\
 };\
-proto.get=function ", className, "_get(){\
-return ", (useGetters ? "this.data.get(this.offset)" : "this.data[this.offset]"),
+proto.pick=function "+className+"_pick(){\
+return TrivialArray(this.data);\
+};\
+proto.valueOf=proto.get=function "+className+"_get(){\
+return "+(useGetters ? "this.data.get(this.offset)" : "this.data[this.offset]")+
 "};\
-proto.set=function ", className, "_set(v){\
-return ", (useGetters ? "this.data.get(this.offset)" : "this.data[this.offset]"), "=v\
+proto.set=function "+className+"_set(v){\
+return "+(useGetters ? "this.data.set(this.offset,v)" : "this.data[this.offset]=v")+"\
 };\
-return function construct_", className, "(a,b,c,d){return new ", className, "(a,d)}"].join("")
-    var procedure = new Function(code)
-    return procedure()
+return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
+    var procedure = new Function("TrivialArray", code)
+    return procedure(CACHED_CONSTRUCTORS[dtype][0])
   }
 
   var code = ["'use strict'"]
@@ -82,43 +104,41 @@ return function construct_", className, "(a,b,c,d){return new ", className, "(a,
   var index_str = "this.offset+" + indices.map(function(i) {
         return ["this._stride", i, "*i",i].join("")
       }).join("+")
-  code.push(["function ", className, "(a,",
+  code.push("function "+className+"(a,"+
     indices.map(function(i) {
       return "b"+i
-    }).join(","), ",",
+    }).join(",")+","+
     indices.map(function(i) {
       return "c"+i
-    }).join(","), ",d){this.data=a"].join(""))
+    }).join(",")+",d){this.data=a")
   for(var i=0; i<dimension; ++i) {
-    code.push(["this._shape",i,"=b",i,"|0"].join(""))
+    code.push("this._shape"+i+"=b"+i+"|0")
   }
   for(var i=0; i<dimension; ++i) {
-    code.push(["this._stride",i,"=c",i,"|0"].join(""))
+    code.push("this._stride"+i+"=c"+i+"|0")
   }
-  code.push("this.offset=d|0}")
-  
-  //Get prototype
-  code.push(["var proto=",className,".prototype"].join(""))
-  
-  //view.dtype:
-  code.push(["proto.dtype='", dtype, "'"].join(""))
-  code.push("proto.dimension="+dimension)
+  code.push("this.offset=d|0}",
+    "var proto="+className+".prototype",
+    "proto.dtype='"+dtype+"'",
+    "proto.dimension="+dimension)
   
   //view.stride and view.shape
-  var strideClassName = ["VStride", dimension, "d", dtype].join("")
-  var shapeClassName = ["VShape", dimension, "d", dtype].join("")
+  var strideClassName = "VStride" + dimension + "d" + dtype
+  var shapeClassName = "VShape" + dimension + "d" + dtype
   var props = {"stride":strideClassName, "shape":shapeClassName}
   for(var prop in props) {
     var arrayName = props[prop]
-    code.push(["function ", arrayName, "(v) {this._v=v} var aproto=", arrayName, ".prototype"].join(""))
-    code.push(["aproto.length=",dimension].join(""))
+    code.push(
+      "function " + arrayName + "(v) {this._v=v} var aproto=" + arrayName + ".prototype",
+      "aproto.length="+dimension)
     
     var array_elements = []
     for(var i=0; i<dimension; ++i) {
       array_elements.push(["this._v._", prop, i].join(""))
     }
-    code.push(["aproto.toJSON=function ", arrayName, "_toJSON(){return [", array_elements.join(","), "]}"].join(""))
-    code.push(["aproto.toString=function ", arrayName, "_toString(){return [", array_elements.join(","), "].join()}"].join(""))
+    code.push(
+      "aproto.toJSON=function " + arrayName + "_toJSON(){return [" + array_elements.join(",") + "]}",
+      "aproto.valueOf=aproto.toString=function " + arrayName + "_toString(){return [" + array_elements.join(",") + "].join()}")
     
     for(var i=0; i<dimension; ++i) {
       code.push(["Object.defineProperty(aproto,", i, ",{get:function(){return this._v._", prop, i, "},set:function(v){return this._v._", prop, i, "=v|0},enumerable:true})"].join(""))
@@ -270,7 +290,7 @@ b",i,"*=d\
   for(var i=0; i<dimension; ++i) {
     code.push(["if(typeof i",i,"==='number'&&i",i,">=0){c=(c+this._stride",i,"*i",i,")|0}else{a.push(this._shape",i,");b.push(this._stride",i,")}"].join(""))
   }
-  code.push("var ctor=CTOR_LIST[a.length];return ctor(this.data,a,b,c)}")
+  code.push("var ctor=CTOR_LIST[a.length+1];return ctor(this.data,a,b,c)}")
     
   //Add return statement
   code.push(["return function construct_",className,"(data,shape,stride,offset){return new ", className,"(data,",
@@ -328,7 +348,19 @@ var CACHED_CONSTRUCTORS = {
   "generic":[]
 }
 
+;(function() {
+  for(var id in CACHED_CONSTRUCTORS) {
+    CACHED_CONSTRUCTORS[id] = compileConstructor(id, -1)
+  }
+});
+
 function wrappedNDArrayCtor(data, shape, stride, offset) {
+  if(data === undefined) {
+    var ctor = CACHED_CONSTRUCTORS.array[0]
+    return ctor([])
+  } else if(typeof data === "number") {
+    data = [data]
+  }
   if(shape === undefined) {
     shape = [ data.length ]
   }
@@ -350,10 +382,10 @@ function wrappedNDArrayCtor(data, shape, stride, offset) {
   }
   var dtype = arrayDType(data)
   var ctor_list = CACHED_CONSTRUCTORS[dtype]
-  while(ctor_list.length <= d) {
-    ctor_list.push(compileConstructor(dtype, ctor_list.length))
+  while(ctor_list.length <= d+1) {
+    ctor_list.push(compileConstructor(dtype, ctor_list.length-1))
   }
-  var ctor = ctor_list[d]
+  var ctor = ctor_list[d+1]
   return ctor(data, shape, stride, offset)
 }
 
