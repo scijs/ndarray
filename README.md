@@ -71,6 +71,7 @@ for(var i=0; i<y.shape[0]; ++i) {
 //        0 0 0 0 0
 ```
 
+ndarrays can be transposed, flipped, sheared and sliced in constant time per operation. They are useful for representing images, audio, volume graphics, matrices, strings and much more. They work both in node.js and with [browserify](http://browserify.org/).  Plenty of modules using ndarrays can be found on [npmjs.org](https://www.npmjs.org/search?q=ndarray).
 
 Install
 =======
@@ -233,6 +234,7 @@ As the above example illustrates, passing a negative or non-numeric value to a c
 For more discussion regarding the technical details see the following blog posts:
 
 * [ndarray presentation](http://mikolalysenko.github.io/ndarray-presentation/)
+* [Interactive slice demo](http://mikolalysenko.github.io/ndarray-visual-demo/)
 * [ndarray tutorial](https://github.com/mikolalysenko/ndarray-tutorial)  (Work in progress)
 * [Implementing multidimensional arrays in JavaScript](http://0fps.wordpress.com/2013/05/22/implementing-multidimensional-arrays-in-javascript/)
 * [Cache oblivious array operations](http://0fps.wordpress.com/2013/05/28/cache-oblivious-array-operations/)
