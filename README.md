@@ -1,14 +1,6 @@
 ndarray
 =======
-Multidimensional arrays for JavaScript.  For more discussion regarding the technical details see the following blog posts:
-
-* [ndarray tutorial](https://github.com/mikolalysenko/ndarray-tutorial)  (Work in progress)
-* [Implementing multidimensional arrays in JavaScript](http://0fps.wordpress.com/2013/05/22/implementing-multidimensional-arrays-in-javascript/)
-* [Cache oblivious array operations](http://0fps.wordpress.com/2013/05/28/cache-oblivious-array-operations/)
-* [ndarray modules](http://0fps.wordpress.com/2013/06/01/ndarray-modules/)
-* [ndarray benchmarks](https://github.com/mikolalysenko/ndarray-experiments)
-
-[![stable](https://rawgithub.com/hughsk/stability-badges/master/dist/stable.svg)](http://github.com/hughsk/stability-badges)
+Multidimensional arrays for JavaScript. 
 
 Introduction
 ============
@@ -235,6 +227,19 @@ var blue  = image.pick(null, null, 2)
 ```
 
 As the above example illustrates, passing a negative or non-numeric value to a coordinate in pick skips that index.
+
+# Mor information
+
+For more discussion regarding the technical details see the following blog posts:
+
+* [ndarray presentation](http://mikolalysenko.github.io/ndarray-presentation/)
+* [ndarray tutorial](https://github.com/mikolalysenko/ndarray-tutorial)  (Work in progress)
+* [Implementing multidimensional arrays in JavaScript](http://0fps.wordpress.com/2013/05/22/implementing-multidimensional-arrays-in-javascript/)
+* [Cache oblivious array operations](http://0fps.wordpress.com/2013/05/28/cache-oblivious-array-operations/)
+* [ndarray modules](http://0fps.wordpress.com/2013/06/01/ndarray-modules/)
+* [ndarray benchmarks](https://github.com/mikolalysenko/ndarray-experiments)
+
+[![stable](https://rawgithub.com/hughsk/stability-badges/master/dist/stable.svg)](http://github.com/hughsk/stability-badges)
 
 Credits
 =======
