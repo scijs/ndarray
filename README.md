@@ -229,7 +229,7 @@ var blue  = image.pick(null, null, 2)
 
 As the above example illustrates, passing a negative or non-numeric value to a coordinate in pick skips that index.
 
-# Mor information
+# More information
 
 For more discussion regarding the technical details see the following blog posts:
 
