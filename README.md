@@ -71,7 +71,7 @@ for(var i=0; i<y.shape[0]; ++i) {
 //        0 0 0 0 0
 ```
 
-ndarrays can be transposed, flipped, sheared and sliced in constant time per operation. They are useful for representing images, audio, volume graphics, matrices, strings and much more. They work both in node.js and with [browserify](http://browserify.org/).  Plenty of modules using ndarrays can be found on [npmjs.org](https://www.npmjs.org/search?q=ndarray).
+ndarrays can be transposed, flipped, sheared and sliced in constant time per operation. They are useful for representing images, audio, volume graphics, matrices, strings and much more. They work both in node.js and with [browserify](http://browserify.org/).
 
 Install
 =======
