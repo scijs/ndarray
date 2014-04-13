@@ -350,7 +350,7 @@ var CACHED_CONSTRUCTORS = {
 
 ;(function() {
   for(var id in CACHED_CONSTRUCTORS) {
-    CACHED_CONSTRUCTORS[id] = compileConstructor(id, -1)
+    CACHED_CONSTRUCTORS[id] = [ compileConstructor(id, -1) ]
   }
 });
 
