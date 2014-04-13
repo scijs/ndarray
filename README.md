@@ -174,7 +174,7 @@ Returns the size of the array in logical elements.
 Returns the order of the stride of the array, sorted in ascending length. The first element is the first index of the shortest stride and the last is the index the longest stride.
 
 ### `array.dimension`
-Returns the dimension of the array.  Basically a shortcut for `array.shape.length`
+Returns the dimension of the array.
 
 ## Slicing
 Given a view, we can change the indexing by shifting, truncating or permuting the strides.  This lets us perform operations like array reversals or matrix transpose in **constant time** (well, technically `O(shape.length)`, but since shape.length is typically less than 4, it might as well be).  To make life simpler, the following interfaces are exposed:
