@@ -2,7 +2,7 @@ ndarray
 =======
 Modular multidimensional arrays for JavaScript. 
 
-* [Giant list of ndarray based modules](https://github.com/mikolalysenko/ndarray/wiki/ndarray-module-list#core-module)
+#### [Big list of ndarray modules](https://github.com/mikolalysenko/ndarray/wiki/ndarray-module-list#core-module)
 
 Introduction
 ============
