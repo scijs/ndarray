@@ -10,14 +10,13 @@
     "iota-array": "^1.0.0"
   },
   "devDependencies": {
-    "tap": "~0.4.0",
-    "tape": "~1.0.4",
-    "permutation-rank": "0.0.0",
-    "dup": "0.0.0",
-    "invert-permutation": "0.0.0"
+    "permutation-rank": "^1.0.0",
+    "dup": "^1.0.0",
+    "invert-permutation": "^1.0.0",
+    "tape": "^2.12.3"
   },
   "scripts": {
-    "test": "tap test/*.js"
+    "test": "tape test/*.js"
   },
   "repository": {
     "type": "git",
