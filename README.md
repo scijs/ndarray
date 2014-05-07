@@ -1,6 +1,8 @@
 ndarray
 =======
-Multidimensional arrays for JavaScript. 
+Modular multidimensional arrays for JavaScript. 
+
+#### [Big list of ndarray modules](https://github.com/mikolalysenko/ndarray/wiki/ndarray-module-list#core-module)
 
 Introduction
 ============
