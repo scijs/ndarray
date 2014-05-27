@@ -1,5 +1,3 @@
-"use strict"
-
 var iota = require("iota-array")
 
 var arrayMethods = [
@@ -17,6 +15,9 @@ var arrayMethods = [
   "reduce",
   "reduceRight"
 ]
+
+var hasTypedArrays  = ((typeof Float64Array) !== "undefined")
+var hasBuffer       = ((typeof Buffer) !== "undefined")
 
 function compare1st(a, b) {
   return a[0] - b[0]
@@ -102,15 +103,15 @@ return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
   var indices = iota(dimension)
   var args = indices.map(function(i) { return "i"+i })
   var index_str = "this.offset+" + indices.map(function(i) {
-        return ["this._stride", i, "*i",i].join("")
+        return "this._stride" + i + "*i" + i
       }).join("+")
   code.push("function "+className+"(a,"+
     indices.map(function(i) {
       return "b"+i
-    }).join(",")+","+
+    }).join(",") + "," +
     indices.map(function(i) {
       return "c"+i
-    }).join(",")+",d){this.data=a")
+    }).join(",") + ",d){this.data=a")
   for(var i=0; i<dimension; ++i) {
     code.push("this._shape"+i+"=b"+i+"|0")
   }
@@ -141,24 +142,24 @@ return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
       "aproto.valueOf=aproto.toString=function " + arrayName + "_toString(){return [" + array_elements.join(",") + "].join()}")
     
     for(var i=0; i<dimension; ++i) {
-      code.push(["Object.defineProperty(aproto,", i, ",{get:function(){return this._v._", prop, i, "},set:function(v){return this._v._", prop, i, "=v|0},enumerable:true})"].join(""))
+      code.push("Object.defineProperty(aproto,"+i+",{get:function(){return this._v._"+prop+i+"},set:function(v){return this._v._"+prop+i+"=v|0},enumerable:true})")
     }
     for(var i=0; i<arrayMethods.length; ++i) {
       if(arrayMethods[i] in Array.prototype) {
-        code.push(["aproto.", arrayMethods[i], "=Array.prototype.", arrayMethods[i]].join(""))
+        code.push("aproto."+arrayMethods[i]+"=Array.prototype."+arrayMethods[i])
       }
     }
     code.push(["Object.defineProperty(proto,'",prop,"',{get:function ", arrayName, "_get(){return new ", arrayName, "(this)},set: function ", arrayName, "_set(v){"].join(""))
     for(var i=0; i<dimension; ++i) {
-      code.push(["this._", prop, i, "=v[", i, "]|0"].join(""))
+      code.push("this._"+prop+i+"=v["+i+"]|0")
     }
     code.push("return v}})")
   }
   
   //view.size:
-  code.push(["Object.defineProperty(proto,'size',{get:function ",className,"_size(){\
-return ", indices.map(function(i) { return ["this._shape", i].join("") }).join("*"),
-"}})"].join(""))
+  code.push("Object.defineProperty(proto,'size',{get:function "+className+"_size(){\
+return "+indices.map(function(i) { return "this._shape"+i }).join("*"),
+"}})")
 
   //view.order:
   if(dimension === 1) {
@@ -166,7 +167,7 @@ return ", indices.map(function(i) { return ["this._shape", i].join("") }).join("
   } else {
     code.push("Object.defineProperty(proto,'order',{get:")
     if(dimension < 4) {
-      code.push(["function ",className,"_order(){"].join(""))
+      code.push("function "+className+"_order(){")
       if(dimension === 2) {
         code.push("return (Math.abs(this._stride0)>Math.abs(this._stride1))?[1,0]:[0,1]}})")
       } else if(dimension === 3) {
@@ -194,112 +195,109 @@ return [0,2,1];\
   }
   
   //view.set(i0, ..., v):
-  code.push([
-"proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))
+  code.push(
+"proto.set=function "+className+"_set("+args.join(",")+",v){")
   if(useGetters) {
-    code.push(["return this.data.set(", index_str, ",v)}"].join(""))
+    code.push("return this.data.set("+index_str+",v)}")
   } else {
-    code.push(["return this.data[", index_str, "]=v}"].join(""))
+    code.push("return this.data["+index_str+"]=v}")
   }
   
   //view.get(i0, ...):
-  code.push(["proto.get=function ",className,"_get(", args.join(","), "){"].join(""))
+  code.push("proto.get=function "+className+"_get("+args.join(",")+"){")
   if(useGetters) {
-    code.push(["return this.data.get(", index_str, ")}"].join(""))
+    code.push("return this.data.get("+index_str+")}")
   } else {
-    code.push(["return this.data[", index_str, "]}"].join(""))
+    code.push("return this.data["+index_str+"]}")
   }
   
   //view.index:
-  code.push([
-    "proto.index=function ",
-      className,
-      "_index(", args.join(), "){return ", 
-      index_str, "}"].join(""))
+  code.push(
+    "proto.index=function "+className+"_index(", args.join(), "){return "+index_str+"}")
 
   //view.hi():
-  code.push(["proto.hi=function ",className,"_hi(",args.join(","),"){return new ", className, "(this.data,",
+  code.push("proto.hi=function "+className+"_hi("+args.join(",")+"){return new "+className+"(this.data,"+
     indices.map(function(i) {
       return ["(typeof i",i,"!=='number'||i",i,"<0)?this._shape", i, ":i", i,"|0"].join("")
-    }).join(","), ",",
+    }).join(",")+","+
     indices.map(function(i) {
       return "this._stride"+i
-    }).join(","), ",this.offset)}"].join(""))
+    }).join(",")+",this.offset)}")
   
   //view.lo():
   var a_vars = indices.map(function(i) { return "a"+i+"=this._shape"+i })
   var c_vars = indices.map(function(i) { return "c"+i+"=this._stride"+i })
-  code.push(["proto.lo=function ",className,"_lo(",args.join(","),"){var b=this.offset,d=0,", a_vars.join(","), ",", c_vars.join(",")].join(""))
+  code.push("proto.lo=function "+className+"_lo("+args.join(",")+"){var b=this.offset,d=0,"+a_vars.join(",")+","+c_vars.join(","))
   for(var i=0; i<dimension; ++i) {
-    code.push([
-"if(typeof i",i,"==='number'&&i",i,">=0){\
-d=i",i,"|0;\
-b+=c",i,"*d;\
-a",i,"-=d}"].join(""))
+    code.push(
+"if(typeof i"+i+"==='number'&&i"+i+">=0){\
+d=i"+i+"|0;\
+b+=c"+i+"*d;\
+a"+i+"-=d}")
   }
-  code.push(["return new ", className, "(this.data,",
+  code.push("return new "+className+"(this.data,"+
     indices.map(function(i) {
       return "a"+i
-    }).join(","),",",
+    }).join(",")+","+
     indices.map(function(i) {
       return "c"+i
-    }).join(","), ",b)}"].join(""))
+    }).join(",")+",b)}")
   
   //view.step():
-  code.push(["proto.step=function ",className,"_step(",args.join(","),"){var ",
+  code.push("proto.step=function "+className+"_step("+args.join(",")+"){var "+
     indices.map(function(i) {
       return "a"+i+"=this._shape"+i
-    }).join(","), ",",
+    }).join(",")+","+
     indices.map(function(i) {
       return "b"+i+"=this._stride"+i
-    }).join(","),",c=this.offset,d=0,ceil=Math.ceil"].join(""))
+    }).join(",")+",c=this.offset,d=0,ceil=Math.ceil")
   for(var i=0; i<dimension; ++i) {
-    code.push([
-"if(typeof i",i,"==='number'){\
-d=i",i,"|0;\
+    code.push(
+"if(typeof i"+i+"==='number'){\
+d=i"+i+"|0;\
 if(d<0){\
-c+=b",i,"*(a",i,"-1);\
-a",i,"=ceil(-a",i,"/d)\
+c+=b"+i+"*(a"+i+"-1);\
+a"+i+"=ceil(-a"+i+"/d)\
 }else{\
-a",i,"=ceil(a",i,"/d)\
+a"+i+"=ceil(a"+i+"/d)\
 }\
-b",i,"*=d\
-}"].join(""))
+b"+i+"*=d\
+}")
   }
-  code.push(["return new ", className, "(this.data,",
+  code.push("return new "+className+"(this.data,"+
     indices.map(function(i) {
       return "a" + i
-    }).join(","), ",",
+    }).join(",")+","+
     indices.map(function(i) {
       return "b" + i
-    }).join(","), ",c)}"].join(""))
+    }).join(",")+",c)}")
   
   //view.transpose():
   var tShape = new Array(dimension)
   var tStride = new Array(dimension)
   for(var i=0; i<dimension; ++i) {
-    tShape[i] = ["a[i", i, "]"].join("")
-    tStride[i] = ["b[i", i, "]"].join("")
+    tShape[i] = "a[i"+i+"]"
+    tStride[i] = "b[i"+i+"]"
   }
-  code.push(["proto.transpose=function ",className,"_transpose(",args,"){", 
+  code.push("proto.transpose=function "+className+"_transpose("+args+"){"+
     args.map(function(n,idx) { return n + "=(" + n + "===undefined?" + idx + ":" + n + "|0)"}).join(";"),
-    ";var a=this.shape,b=this.stride;return new ", className, "(this.data,", tShape.join(","), ",", tStride.join(","), ",this.offset)}"].join(""))
+    "var a=this.shape,b=this.stride;return new "+className+"(this.data,"+tShape.join(",")+","+tStride.join(",")+",this.offset)}")
   
   //view.pick():
-  code.push(["proto.pick=function ",className,"_pick(",args,"){var a=[],b=[],c=this.offset"].join(""))
+  code.push("proto.pick=function "+className+"_pick("+args+"){var a=[],b=[],c=this.offset")
   for(var i=0; i<dimension; ++i) {
-    code.push(["if(typeof i",i,"==='number'&&i",i,">=0){c=(c+this._stride",i,"*i",i,")|0}else{a.push(this._shape",i,");b.push(this._stride",i,")}"].join(""))
+    code.push("if(typeof i"+i+"==='number'&&i"+i+">=0){c=(c+this._stride"+i+"*i"+i+")|0}else{a.push(this._shape"+i+");b.push(this._stride"+i+")}")
   }
   code.push("var ctor=CTOR_LIST[a.length+1];return ctor(this.data,a,b,c)}")
     
   //Add return statement
-  code.push(["return function construct_",className,"(data,shape,stride,offset){return new ", className,"(data,",
+  code.push("return function construct_"+className+"(data,shape,stride,offset){return new "+className+"(data,"+
     indices.map(function(i) {
       return "shape["+i+"]"
-    }).join(","), ",",
+    }).join(",")+","+
     indices.map(function(i) {
       return "stride["+i+"]"
-    }).join(","), ",offset)}"].join(""))
+    }).join(",")+",offset)}")
 
   //Compile procedure
   var procedure = new Function("CTOR_LIST", "ORDER", code.join("\n"))
@@ -307,27 +305,34 @@ b",i,"*=d\
 }
 
 function arrayDType(data) {
-  if(data instanceof Float64Array) {
-    return "float64";
-  } else if(data instanceof Float32Array) {
-    return "float32"
-  } else if(data instanceof Int32Array) {
-    return "int32"
-  } else if(data instanceof Uint32Array) {
-    return "uint32"
-  } else if(data instanceof Uint8Array) {
-    return "uint8"
-  } else if(data instanceof Uint16Array) {
-    return "uint16"
-  } else if(data instanceof Int16Array) {
-    return "int16"
-  } else if(data instanceof Int8Array) {
-    return "int8"
-  } else if(data instanceof Uint8ClampedArray) {
-    return "uint8_clamped"
-  } else if((typeof Buffer !== "undefined") && (data instanceof Buffer)) {
-    return "buffer"
-  } else if(data instanceof Array) {
+  if(hasTypedArrays) {
+    switch(Object.prototype.toString.call(data)) {
+      case "[object Float64Array]":
+        return "float64"
+      case "[object Float32Array]":
+        return "float32"
+      case "[object Int8Array]":
+        return "int8"
+      case "[object Int16Array]":
+        return "int16"
+      case "[object Int32Array]":
+        return "int32"
+      case "[object Uint8Array]":
+        return "uint8"
+      case "[object Uint16Array]":
+        return "uint16"
+      case "[object Uint32Array]":
+        return "uint32"
+      case "[object Uint8ClampedArray]":
+        return "uint8_clamped"
+    }
+  }
+  if(hasBuffer) {
+    if(Buffer.isBuffer(data)) {
+      return "buffer"
+    }
+  }
+  if(Array.isArray(data)) {
     return "array"
   }
   return "generic"
