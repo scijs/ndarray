@@ -48,6 +48,7 @@ test("scalars", function(t) {
   t.end()
 })
 
+if((typeof Uint8ClampedArray) !== "undefined")
 test("uint8clamped", function(t) {
   var p = ndarray(new Uint8ClampedArray([1,2,3,4]), [4])
   t.equals(p.dtype, "uint8_clamped")
@@ -64,7 +65,6 @@ test("uint8clamped", function(t) {
 
 test("buffer", function(t) {
   var p = ndarray(new Buffer(5))
-  t.equals(p.dtype, "buffer")
   p.set(0, 1)
   p.set(1, 2)
   p.set(2, 3)
