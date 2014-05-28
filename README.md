@@ -5,9 +5,10 @@ Modular multidimensional arrays for JavaScript.
 [![browser support](https://ci.testling.com/mikolalysenko/ndarray.png)
 ](https://ci.testling.com/mikolalysenko/ndarray)
 
+[![stable](https://rawgithub.com/hughsk/stability-badges/master/dist/frozen.svg)](http://github.com/hughsk/stability-badges)
+
 #### [Big list of ndarray modules](https://github.com/mikolalysenko/ndarray/wiki/ndarray-module-list#core-module)
 
-[![stable](https://rawgithub.com/hughsk/stability-badges/master/dist/frozen.svg)](http://github.com/hughsk/stability-badges)
 
 Introduction
 ============

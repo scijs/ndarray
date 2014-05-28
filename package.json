@@ -1,6 +1,6 @@
 {
   "name": "ndarray",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Multidimensional Arrays",
   "main": "ndarray.js",
   "directories": {
@@ -45,5 +45,23 @@
   "author": "Mikola Lysenko",
   "license": "MIT",
   "readmeFilename": "README.md",
-  "gitHead": "a85785ca7a7e12c3fc29671a4f7c214bebc4ddc7"
+  "gitHead": "a85785ca7a7e12c3fc29671a4f7c214bebc4ddc7",
+  "testling": {
+    "files": "test/*.js",
+    "browsers": [
+      "ie/10..latest",
+      "firefox/15",
+      "firefox/latest",
+      "firefox/nightly",
+      "chrome/15",
+      "chrome/latest",
+      "chrome/canary",
+      "opera/12..latest",
+      "opera/next",
+      "safari/5.1..latest",
+      "ipad/6.0..latest",
+      "iphone/6.0..latest",
+      "android-browser/4.2..latest"
+    ]
+  }
 }
