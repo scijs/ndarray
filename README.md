@@ -239,16 +239,12 @@ As the above example illustrates, passing a negative or non-numeric value to a c
 
 # More information
 
-For more discussion regarding the technical details see the following blog posts:
+For more discussion about ndarrays, here are some talks, tutorials and articles about them:
 
 * [ndarray presentation](http://mikolalysenko.github.io/ndarray-presentation/)
-* [Interactive slice demo](http://mikolalysenko.github.io/ndarray-visual-demo/)
-* [ndarray tutorial](https://github.com/mikolalysenko/ndarray-tutorial)  (Work in progress)
 * [Implementing multidimensional arrays in JavaScript](http://0fps.wordpress.com/2013/05/22/implementing-multidimensional-arrays-in-javascript/)
 * [Cache oblivious array operations](http://0fps.wordpress.com/2013/05/28/cache-oblivious-array-operations/)
-* [ndarray modules](http://0fps.wordpress.com/2013/06/01/ndarray-modules/)
-* [ndarray benchmarks](https://github.com/mikolalysenko/ndarray-experiments)
-
+* [Some experiments](https://github.com/mikolalysenko/ndarray-experiments)
 
 Credits
 =======

@@ -50,11 +50,9 @@
     "files": "test/*.js",
     "browsers": [
       "ie/10..latest",
-      "firefox/15",
-      "firefox/latest",
+      "firefox/17..latest",
       "firefox/nightly",
-      "chrome/15",
-      "chrome/latest",
+      "chrome/22..latest",
       "chrome/canary",
       "opera/12..latest",
       "opera/next",
