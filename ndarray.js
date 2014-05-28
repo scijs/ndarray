@@ -305,6 +305,11 @@ b"+i+"*=d\
 }
 
 function arrayDType(data) {
+  if(hasBuffer) {
+    if(Buffer.isBuffer(data)) {
+      return "buffer"
+    }
+  }
   if(hasTypedArrays) {
     switch(Object.prototype.toString.call(data)) {
       case "[object Float64Array]":
@@ -325,11 +330,6 @@ function arrayDType(data) {
         return "uint32"
       case "[object Uint8ClampedArray]":
         return "uint8_clamped"
-    }
-  }
-  if(hasBuffer) {
-    if(Buffer.isBuffer(data)) {
-      return "buffer"
     }
   }
   if(Array.isArray(data)) {

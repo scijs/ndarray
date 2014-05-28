@@ -65,6 +65,7 @@ test("uint8clamped", function(t) {
 
 test("buffer", function(t) {
   var p = ndarray(new Buffer(5))
+  t.equals(p.dtype, "buffer")
   p.set(0, 1)
   p.set(1, 2)
   p.set(2, 3)
@@ -76,10 +77,24 @@ test("buffer", function(t) {
   t.end()
 })
 
+test("dtypes", function(t) {
+  t.equals(ndarray(new Uint8Array(5)).dtype, "uint8")
+  t.equals(ndarray(new Uint16Array(5)).dtype, "uint16")
+  t.equals(ndarray(new Uint32Array(5)).dtype, "uint32")
+  t.equals(ndarray(new Int8Array(5)).dtype, "int8")
+  t.equals(ndarray(new Int16Array(5)).dtype, "int16")
+  t.equals(ndarray(new Int32Array(5)).dtype, "int32")
+  t.equals(ndarray(new Float32Array(5)).dtype, "float32")
+  t.equals(ndarray(new Float64Array(5)).dtype, "float64")
+  t.equals(ndarray([1,2,3]).dtype, "array")
+  t.end()
+})
+
 test("shape/stride", function(t) {
 
   var p = ndarray(new Float32Array(100), [3,3,3], [3,2,1])
   
+  t.equals(p.dtype, "float32")
   t.equals(p.shape[0], 3)
   p.shape[0] = 1
   t.equals(p.shape[0], 1)
@@ -142,8 +157,6 @@ test("pick", function(t) {
   t.equals(y.get(3), 0)
   t.equals(y.get(4), 5)
   t.equals(y.shape.join(","), "5")
-  
-  
   
   t.end()
 })
@@ -210,7 +223,6 @@ test("hi", function(t) {
 
 
 test("step", function(t) {
-
   var x = ndarray(new Float32Array(10))
   for(var i=0; i<10; ++i) {
     x.set(i, i)
@@ -276,6 +288,30 @@ test("toJSON", function(t) {
   var x = ndarray(new Float32Array(10))
   
   t.same(JSON.stringify(x.shape), "[10]")
+  
+  t.end()
+})
+
+test("generic", function(t) {
+  var hash = {}
+  var hashStore = {
+    get: function(i) {
+      return +hash[i]
+    },
+    set: function(i,v) {
+      return hash[i]=v
+    },
+    length: Infinity
+  }
+  var array = ndarray(hashStore, [1000,1000,1000])
+
+  t.equals(array.dtype, "generic")
+  t.same(array.shape.slice(), [1000,1000,1000])
+
+  array.set(10,10,10, 1)
+  t.equals(array.get(10,10,10), 1)
+  t.equals(array.pick(10).dtype, "generic")
+  t.equals(+array.pick(10).pick(10).pick(10), 1)
   
   t.end()
 })
