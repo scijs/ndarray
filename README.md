@@ -3,9 +3,11 @@ ndarray
 Modular multidimensional arrays for JavaScript. 
 
 [![browser support](https://ci.testling.com/mikolalysenko/ndarray.png)
-](https://ci.testling.com/mikolalysenko/ndarray.png)
+](https://ci.testling.com/mikolalysenko/ndarray)
 
 #### [Big list of ndarray modules](https://github.com/mikolalysenko/ndarray/wiki/ndarray-module-list#core-module)
+
+[![stable](https://rawgithub.com/hughsk/stability-badges/master/dist/frozen.svg)](http://github.com/hughsk/stability-badges)
 
 Introduction
 ============
@@ -246,7 +248,6 @@ For more discussion regarding the technical details see the following blog posts
 * [ndarray modules](http://0fps.wordpress.com/2013/06/01/ndarray-modules/)
 * [ndarray benchmarks](https://github.com/mikolalysenko/ndarray-experiments)
 
-[![stable](https://rawgithub.com/hughsk/stability-badges/master/dist/stable.svg)](http://github.com/hughsk/stability-badges)
 
 Credits
 =======
