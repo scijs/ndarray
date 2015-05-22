@@ -1,4 +1,5 @@
 var iota = require("iota-array")
+var isBuffer = require("is-buffer")
 
 var arrayMethods = [
   "concat",
@@ -17,7 +18,6 @@ var arrayMethods = [
 ]
 
 var hasTypedArrays  = ((typeof Float64Array) !== "undefined")
-var hasBuffer       = ((typeof Buffer) !== "undefined")
 
 function compare1st(a, b) {
   return a[0] - b[0]
@@ -44,10 +44,10 @@ function compileConstructor(dtype, dimension) {
     className = "View_Nil" + dtype
   }
   var useGetters = (dtype === "generic")
-  
+
   if(dimension === -1) {
     //Special case for trivial arrays
-    var code = 
+    var code =
       "function "+className+"(a){this.data=a;};\
 var proto="+className+".prototype;\
 proto.dtype='"+dtype+"';\
@@ -98,7 +98,7 @@ return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
   }
 
   var code = ["'use strict'"]
-    
+
   //Create constructor for view
   var indices = iota(dimension)
   var args = indices.map(function(i) { return "i"+i })
@@ -122,7 +122,7 @@ return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
     "var proto="+className+".prototype",
     "proto.dtype='"+dtype+"'",
     "proto.dimension="+dimension)
-  
+
   //view.stride and view.shape
   var strideClassName = "VStride" + dimension + "d" + dtype
   var shapeClassName = "VShape" + dimension + "d" + dtype
@@ -132,7 +132,7 @@ return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
     code.push(
       "function " + arrayName + "(v) {this._v=v} var aproto=" + arrayName + ".prototype",
       "aproto.length="+dimension)
-    
+
     var array_elements = []
     for(var i=0; i<dimension; ++i) {
       array_elements.push(["this._v._", prop, i].join(""))
@@ -140,7 +140,7 @@ return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
     code.push(
       "aproto.toJSON=function " + arrayName + "_toJSON(){return [" + array_elements.join(",") + "]}",
       "aproto.valueOf=aproto.toString=function " + arrayName + "_toString(){return [" + array_elements.join(",") + "].join()}")
-    
+
     for(var i=0; i<dimension; ++i) {
       code.push("Object.defineProperty(aproto,"+i+",{get:function(){return this._v._"+prop+i+"},set:function(v){return this._v._"+prop+i+"=v|0},enumerable:true})")
     }
@@ -155,7 +155,7 @@ return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
     }
     code.push("return v}})")
   }
-  
+
   //view.size:
   code.push("Object.defineProperty(proto,'size',{get:function "+className+"_size(){\
 return "+indices.map(function(i) { return "this._shape"+i }).join("*"),
@@ -193,7 +193,7 @@ return [0,2,1];\
       code.push("ORDER})")
     }
   }
-  
+
   //view.set(i0, ..., v):
   code.push(
 "proto.set=function "+className+"_set("+args.join(",")+",v){")
@@ -202,7 +202,7 @@ return [0,2,1];\
   } else {
     code.push("return this.data["+index_str+"]=v}")
   }
-  
+
   //view.get(i0, ...):
   code.push("proto.get=function "+className+"_get("+args.join(",")+"){")
   if(useGetters) {
@@ -210,7 +210,7 @@ return [0,2,1];\
   } else {
     code.push("return this.data["+index_str+"]}")
   }
-  
+
   //view.index:
   code.push(
     "proto.index=function "+className+"_index(", args.join(), "){return "+index_str+"}")
@@ -223,7 +223,7 @@ return [0,2,1];\
     indices.map(function(i) {
       return "this._stride"+i
     }).join(",")+",this.offset)}")
-  
+
   //view.lo():
   var a_vars = indices.map(function(i) { return "a"+i+"=this._shape"+i })
   var c_vars = indices.map(function(i) { return "c"+i+"=this._stride"+i })
@@ -242,7 +242,7 @@ a"+i+"-=d}")
     indices.map(function(i) {
       return "c"+i
     }).join(",")+",b)}")
-  
+
   //view.step():
   code.push("proto.step=function "+className+"_step("+args.join(",")+"){var "+
     indices.map(function(i) {
@@ -271,7 +271,7 @@ b"+i+"*=d\
     indices.map(function(i) {
       return "b" + i
     }).join(",")+",c)}")
-  
+
   //view.transpose():
   var tShape = new Array(dimension)
   var tStride = new Array(dimension)
@@ -282,14 +282,14 @@ b"+i+"*=d\
   code.push("proto.transpose=function "+className+"_transpose("+args+"){"+
     args.map(function(n,idx) { return n + "=(" + n + "===undefined?" + idx + ":" + n + "|0)"}).join(";"),
     "var a=this.shape,b=this.stride;return new "+className+"(this.data,"+tShape.join(",")+","+tStride.join(",")+",this.offset)}")
-  
+
   //view.pick():
   code.push("proto.pick=function "+className+"_pick("+args+"){var a=[],b=[],c=this.offset")
   for(var i=0; i<dimension; ++i) {
     code.push("if(typeof i"+i+"==='number'&&i"+i+">=0){c=(c+this._stride"+i+"*i"+i+")|0}else{a.push(this._shape"+i+");b.push(this._stride"+i+")}")
   }
   code.push("var ctor=CTOR_LIST[a.length+1];return ctor(this.data,a,b,c)}")
-    
+
   //Add return statement
   code.push("return function construct_"+className+"(data,shape,stride,offset){return new "+className+"(data,"+
     indices.map(function(i) {
@@ -305,10 +305,8 @@ b"+i+"*=d\
 }
 
 function arrayDType(data) {
-  if(hasBuffer) {
-    if(Buffer.isBuffer(data)) {
-      return "buffer"
-    }
+  if(isBuffer(data)) {
+    return "buffer"
   }
   if(hasTypedArrays) {
     switch(Object.prototype.toString.call(data)) {
