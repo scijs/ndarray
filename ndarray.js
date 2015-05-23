@@ -1,22 +1,6 @@
 var iota = require("iota-array")
 var isBuffer = require("is-buffer")
 
-var arrayMethods = [
-  "concat",
-  "join",
-  "slice",
-  "toString",
-  "indexOf",
-  "lastIndexOf",
-  "forEach",
-  "every",
-  "some",
-  "filter",
-  "map",
-  "reduce",
-  "reduceRight"
-]
-
 var hasTypedArrays  = ((typeof Float64Array) !== "undefined")
 
 function compare1st(a, b) {
@@ -103,62 +87,26 @@ return function construct_"+className+"(a,b,c,d){return new "+className+"(a,d)}"
   var indices = iota(dimension)
   var args = indices.map(function(i) { return "i"+i })
   var index_str = "this.offset+" + indices.map(function(i) {
-        return "this._stride" + i + "*i" + i
+        return "this.stride[" + i + "]*i" + i
       }).join("+")
-  code.push("function "+className+"(a,"+
-    indices.map(function(i) {
+  var shapeArg = indices.map(function(i) {
       return "b"+i
-    }).join(",") + "," +
-    indices.map(function(i) {
+    }).join(",")
+  var strideArg = indices.map(function(i) {
       return "c"+i
-    }).join(",") + ",d){this.data=a")
-  for(var i=0; i<dimension; ++i) {
-    code.push("this._shape"+i+"=b"+i+"|0")
-  }
-  for(var i=0; i<dimension; ++i) {
-    code.push("this._stride"+i+"=c"+i+"|0")
-  }
-  code.push("this.offset=d|0}",
+    }).join(",")
+  code.push(
+    "function "+className+"(a," + shapeArg + "," + strideArg + ",d){this.data=a",
+      "this.shape=[" + shapeArg + "]",
+      "this.stride=[" + strideArg + "]",
+      "this.offset=d|0}",
     "var proto="+className+".prototype",
     "proto.dtype='"+dtype+"'",
     "proto.dimension="+dimension)
 
-  //view.stride and view.shape
-  var strideClassName = "VStride" + dimension + "d" + dtype
-  var shapeClassName = "VShape" + dimension + "d" + dtype
-  var props = {"stride":strideClassName, "shape":shapeClassName}
-  for(var prop in props) {
-    var arrayName = props[prop]
-    code.push(
-      "function " + arrayName + "(v) {this._v=v} var aproto=" + arrayName + ".prototype",
-      "aproto.length="+dimension)
-
-    var array_elements = []
-    for(var i=0; i<dimension; ++i) {
-      array_elements.push(["this._v._", prop, i].join(""))
-    }
-    code.push(
-      "aproto.toJSON=function " + arrayName + "_toJSON(){return [" + array_elements.join(",") + "]}",
-      "aproto.valueOf=aproto.toString=function " + arrayName + "_toString(){return [" + array_elements.join(",") + "].join()}")
-
-    for(var i=0; i<dimension; ++i) {
-      code.push("Object.defineProperty(aproto,"+i+",{get:function(){return this._v._"+prop+i+"},set:function(v){return this._v._"+prop+i+"=v|0},enumerable:true})")
-    }
-    for(var i=0; i<arrayMethods.length; ++i) {
-      if(arrayMethods[i] in Array.prototype) {
-        code.push("aproto."+arrayMethods[i]+"=Array.prototype."+arrayMethods[i])
-      }
-    }
-    code.push(["Object.defineProperty(proto,'",prop,"',{get:function ", arrayName, "_get(){return new ", arrayName, "(this)},set: function ", arrayName, "_set(v){"].join(""))
-    for(var i=0; i<dimension; ++i) {
-      code.push("this._"+prop+i+"=v["+i+"]|0")
-    }
-    code.push("return v}})")
-  }
-
   //view.size:
   code.push("Object.defineProperty(proto,'size',{get:function "+className+"_size(){\
-return "+indices.map(function(i) { return "this._shape"+i }).join("*"),
+return "+indices.map(function(i) { return "this.shape["+i+"]" }).join("*"),
 "}})")
 
   //view.order:
@@ -169,10 +117,10 @@ return "+indices.map(function(i) { return "this._shape"+i }).join("*"),
     if(dimension < 4) {
       code.push("function "+className+"_order(){")
       if(dimension === 2) {
-        code.push("return (Math.abs(this._stride0)>Math.abs(this._stride1))?[1,0]:[0,1]}})")
+        code.push("return (Math.abs(this.stride[0])>Math.abs(this.stride[1]))?[1,0]:[0,1]}})")
       } else if(dimension === 3) {
         code.push(
-"var s0=Math.abs(this._stride0),s1=Math.abs(this._stride1),s2=Math.abs(this._stride2);\
+"var s0=Math.abs(this.stride[0]),s1=Math.abs(this.stride[1]),s2=Math.abs(this.stride[2]);\
 if(s0>s1){\
 if(s1>s2){\
 return [2,1,0];\
@@ -218,15 +166,15 @@ return [0,2,1];\
   //view.hi():
   code.push("proto.hi=function "+className+"_hi("+args.join(",")+"){return new "+className+"(this.data,"+
     indices.map(function(i) {
-      return ["(typeof i",i,"!=='number'||i",i,"<0)?this._shape", i, ":i", i,"|0"].join("")
+      return ["(typeof i",i,"!=='number'||i",i,"<0)?this.shape[", i, "]:i", i,"|0"].join("")
     }).join(",")+","+
     indices.map(function(i) {
-      return "this._stride"+i
+      return "this.stride["+i + "]"
     }).join(",")+",this.offset)}")
 
   //view.lo():
-  var a_vars = indices.map(function(i) { return "a"+i+"=this._shape"+i })
-  var c_vars = indices.map(function(i) { return "c"+i+"=this._stride"+i })
+  var a_vars = indices.map(function(i) { return "a"+i+"=this.shape["+i+"]" })
+  var c_vars = indices.map(function(i) { return "c"+i+"=this.stride["+i+"]" })
   code.push("proto.lo=function "+className+"_lo("+args.join(",")+"){var b=this.offset,d=0,"+a_vars.join(",")+","+c_vars.join(","))
   for(var i=0; i<dimension; ++i) {
     code.push(
@@ -246,10 +194,10 @@ a"+i+"-=d}")
   //view.step():
   code.push("proto.step=function "+className+"_step("+args.join(",")+"){var "+
     indices.map(function(i) {
-      return "a"+i+"=this._shape"+i
+      return "a"+i+"=this.shape["+i+"]"
     }).join(",")+","+
     indices.map(function(i) {
-      return "b"+i+"=this._stride"+i
+      return "b"+i+"=this.stride["+i+"]"
     }).join(",")+",c=this.offset,d=0,ceil=Math.ceil")
   for(var i=0; i<dimension; ++i) {
     code.push(
@@ -286,7 +234,7 @@ b"+i+"*=d\
   //view.pick():
   code.push("proto.pick=function "+className+"_pick("+args+"){var a=[],b=[],c=this.offset")
   for(var i=0; i<dimension; ++i) {
-    code.push("if(typeof i"+i+"==='number'&&i"+i+">=0){c=(c+this._stride"+i+"*i"+i+")|0}else{a.push(this._shape"+i+");b.push(this._stride"+i+")}")
+    code.push("if(typeof i"+i+"==='number'&&i"+i+">=0){c=(c+this.stride["+i+"]*i"+i+")|0}else{a.push(this.shape["+i+"]);b.push(this.stride["+i+"])}")
   }
   code.push("var ctor=CTOR_LIST[a.length+1];return ctor(this.data,a,b,c)}")
 
