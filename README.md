@@ -9,8 +9,9 @@ Modular multidimensional arrays for JavaScript.
 
 [![stable](https://rawgithub.com/hughsk/stability-badges/master/dist/frozen.svg)](http://github.com/hughsk/stability-badges)
 
-#### [Big list of ndarray modules](https://github.com/mikolalysenko/ndarray/wiki/ndarray-module-list#core-module)
-
+##### Browse a number of ndarray-compatible modules in the [scijs documentation](http://scijs.net/packages)
+##### Coming from MATLAB or numpy? See: [scijs/ndarray for MATLAB users](https://github.com/scijs/scijs-ndarray-for-matlab-users)
+##### [Big list of ndarray modules](https://github.com/mikolalysenko/ndarray/wiki/ndarray-module-list#core-module)
 
 Introduction
 ============
