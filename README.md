@@ -216,7 +216,7 @@ var odds = a.lo(1).step(2)
 ```
 
 ### `array.transpose(p0, p1, ...)`
-Finally, for higher dimensional arrays you can transpose the indices in place.  This has the effect of permuting the shape and stride values.  For example, in a 2D array you can calculate the matrix transpose by:
+Finally, for higher dimensional arrays you can transpose the indices without replicating the data.  This has the effect of permuting the shape and stride values and placing the result in a new view of the same data.  For example, in a 2D array you can calculate the matrix transpose by:
 
 ```javascript
 M.transpose(1, 0)
