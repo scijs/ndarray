@@ -249,6 +249,6 @@ For more discussion about ndarrays, here are some talks, tutorials and articles 
 * [Cache oblivious array operations](http://0fps.wordpress.com/2013/05/28/cache-oblivious-array-operations/)
 * [Some experiments](https://github.com/mikolalysenko/ndarray-experiments)
 
-Credits
+License
 =======
-(c) 2013 Mikola Lysenko. MIT License
+(c) 2013-2016 Mikola Lysenko. MIT License
