@@ -5,13 +5,13 @@ Modular multidimensional arrays for JavaScript.
 [![browser support](https://ci.testling.com/mikolalysenko/ndarray.png)
 ](https://ci.testling.com/mikolalysenko/ndarray)
 
-[![build status](https://secure.travis-ci.org/mikolalysenko/ndarray.png)](http://travis-ci.org/mikolalysenko/ndarray)
+[![build status](https://secure.travis-ci.org/scijs/ndarray.png)](http://travis-ci.org/scijs/ndarray)
 
 [![stable](https://rawgithub.com/hughsk/stability-badges/master/dist/frozen.svg)](http://github.com/hughsk/stability-badges)
 
 ##### Browse a number of ndarray-compatible modules in the [scijs documentation](http://scijs.net/packages)
 ##### Coming from MATLAB or numpy? See: [scijs/ndarray for MATLAB users](https://github.com/scijs/scijs-ndarray-for-matlab-users)
-##### [Big list of ndarray modules](https://github.com/mikolalysenko/ndarray/wiki/ndarray-module-list#core-module)
+##### [Big list of ndarray modules](https://github.com/scijs/ndarray/wiki/ndarray-module-list#core-module)
 
 Introduction
 ============
