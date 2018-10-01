@@ -7,8 +7,7 @@
     "test": "test"
   },
   "dependencies": {
-    "iota-array": "^1.0.0",
-    "is-buffer": "^1.0.2"
+    "iota-array": "^1.0.0"
   },
   "devDependencies": {
     "permutation-rank": "^1.0.0",
