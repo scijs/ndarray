@@ -1,5 +1,7 @@
 var iota = require("iota-array")
-var isBuffer = require("is-buffer")
+function isBuffer(val) {
+  return ![, null].includes(val) && val.constructor === Buffer;
+}
 
 var hasTypedArrays  = ((typeof Float64Array) !== "undefined")
 
