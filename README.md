@@ -169,6 +169,8 @@ Data type | String
 `Uint8Array` | "uint8"
 `Uint16Array` | "uint16"
 `Uint32Array` | "uint32"
+`BigInt64Array` | "bigint64"
+`BigUint64Array` | "biguint64"
 `Float32Array` | "float32"
 `Float64Array` | "float64"
 `Array` | "array"
