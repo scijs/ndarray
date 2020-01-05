@@ -63,6 +63,17 @@ test("uint8clamped", function(t) {
   t.end()
 })
 
+if((typeof BigInt64Array) !== "undefined")
+test("bigint64", function(t) {
+  var p = ndarray(new BigInt64Array([1,2,3,4].map(BigInt)), [4])
+  t.equals(p.dtype, "bigint64")
+  t.equals(p.get(0), BigInt(1))
+  t.equals(p.get(1), BigInt(2))
+  t.equals(p.get(2), BigInt(3))
+  t.equals(p.get(3), BigInt(4))
+  t.end()
+})
+
 test("buffer", function(t) {
   var p = ndarray(new Buffer(5))
   t.equals(p.dtype, "buffer")
