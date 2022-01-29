@@ -145,7 +145,9 @@ return [0,2,1];\
   //view.set(i0, ..., v):
   code.push(
 "proto.set=function "+className+"_set("+args.join(",")+",v){")
-  if(useGetters) {
+  if (index_str === +index_str && index_str === (index_str|0)) { // https://stackoverflow.com/a/3885844/4915882
+    code.push("throw 'set parameter should be integer'")
+  } else if(useGetters) {
     code.push("return this.data.set("+index_str+",v)}")
   } else {
     code.push("return this.data["+index_str+"]=v}")
@@ -153,7 +155,9 @@ return [0,2,1];\
 
   //view.get(i0, ...):
   code.push("proto.get=function "+className+"_get("+args.join(",")+"){")
-  if(useGetters) {
+  if (index_str === +index_str && index_str === (index_str|0)) { // https://stackoverflow.com/a/3885844/4915882
+    code.push("throw 'get parameter should be integer'")
+  } else if (useGetters) {
     code.push("return this.data.get("+index_str+")}")
   } else {
     code.push("return this.data["+index_str+"]}")
