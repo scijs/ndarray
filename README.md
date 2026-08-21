@@ -171,6 +171,7 @@ Data type | String
 `Uint32Array` | "uint32"
 `BigInt64Array` | "bigint64"
 `BigUint64Array` | "biguint64"
+`Float16Array` | "float16"
 `Float32Array` | "float32"
 `Float64Array` | "float64"
 `Array` | "array"

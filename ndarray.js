@@ -262,6 +262,8 @@ function arrayDType(data) {
         return "float64"
       case "[object Float32Array]":
         return "float32"
+      case "[object Float16Array]":
+        return "float16"
       case "[object Int8Array]":
         return "int8"
       case "[object Int16Array]":
@@ -291,6 +293,7 @@ function arrayDType(data) {
 var CACHED_CONSTRUCTORS = {
   "float32":[],
   "float64":[],
+  "float16":[],
   "int8":[],
   "int16":[],
   "int32":[],
