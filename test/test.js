@@ -74,6 +74,22 @@ test("bigint64", function(t) {
   t.end()
 })
 
+if((typeof Float16Array) !== "undefined")
+test("float16", function(t) {
+  var p = ndarray(new Float16Array([1,2,3,4]), [4])
+  t.equals(p.dtype, "float16")
+  t.equals(p.get(0), 1)
+  t.equals(p.get(1), 2)
+  t.equals(p.get(2), 3)
+  t.equals(p.get(3), 4)
+  p.set(0, 0.5)
+  t.equals(p.get(0), 0.5)
+  //values are rounded to the nearest half, as the array itself does
+  p.set(1, 0.1)
+  t.equals(p.get(1), new Float16Array([0.1])[0])
+  t.end()
+})
+
 test("buffer", function(t) {
   var p = ndarray(new Buffer(5))
   t.equals(p.dtype, "buffer")
